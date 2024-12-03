@@ -33,7 +33,7 @@ def upload_image(file: 'FileStorage') -> dict:
         }
 
     # Generate unique filename
-    filename = str(uuid.uuid4()) + '_' + secure_filename(file.filename)
+    filename = str(uuid.uuid4()) + '.' + secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
 
     # Save file
