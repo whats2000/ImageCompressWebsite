@@ -4,11 +4,11 @@
 
 ### Prerequisites
 - Python 3.8 or later
-- Windows OS (for .bat scripts)
+- Windows or Unix-like OS (Linux/macOS)
 
 ### Quick Start
 
-#### Using Startup Scripts
+#### Windows
 1. `start_backend.bat`: Standard backend startup
    - Creates virtual environment if not exists
    - Installs requirements
@@ -18,14 +18,28 @@
    - Same as standard script
    - Provides more detailed logging and version information
 
+#### Unix/Linux/macOS
+1. `start_backend.sh`: Standard backend startup
+   ```bash
+   chmod +x start_backend.sh
+   ./start_backend.sh
+   ```
+
+2. `start_backend_debug.sh`: Verbose debugging version
+   ```bash
+   chmod +x start_backend_debug.sh
+   ./start_backend_debug.sh
+   ```
+
 ### Manual Setup
 
 ```bash
 # Create virtual environment
-python -m venv backend/venv
+python3 -m venv backend/venv
 
 # Activate virtual environment
-backend\venv\Scripts\activate
+source backend/venv/bin/activate  # Unix
+backend\venv\Scripts\activate     # Windows
 
 # Install requirements
 pip install -r backend/requirements.txt
@@ -52,3 +66,9 @@ pytest tests/
 - Image compression (WebP, JPEG)
 - Watermarking
 - Multiple image processing options
+
+## Cross-Platform Support
+- Startup scripts for Windows (.bat)
+- Startup scripts for Unix/Linux/macOS (.sh)
+- Consistent virtual environment setup
+- Automatic requirement installation
