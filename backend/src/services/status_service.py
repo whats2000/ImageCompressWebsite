@@ -6,7 +6,7 @@ def get_image_status(image_id: str) -> dict:
     :param image_id: Unique identifier for the image
     :return: Dictionary with image processing status
     """
-    # Check original image
+    # Check the original image
     original_image_url = None
     for filename in os.listdir('uploads'):
         if filename.startswith(image_id):

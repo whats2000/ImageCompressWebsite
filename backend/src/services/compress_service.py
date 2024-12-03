@@ -1,4 +1,5 @@
 import os
+
 from PIL import Image
 
 def compress_image(image_id: str, compression_format: str, compression_quality: int) -> dict:

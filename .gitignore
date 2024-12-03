@@ -29,3 +29,6 @@ cache-images
 
 # venv
 venv/
+/backend/compressed
+/backend/uploads
+/backend/watermarked

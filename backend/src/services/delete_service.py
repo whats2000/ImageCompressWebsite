@@ -1,5 +1,5 @@
 import os
-import shutil
+
 
 def delete_image(image_id: str) -> dict:
     """

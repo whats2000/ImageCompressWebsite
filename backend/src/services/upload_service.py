@@ -11,7 +11,7 @@ def allowed_file(filename: str) -> bool:
     """
     Check if the file has an allowed extension
     :param filename: Name of the file to check
-    :return: Boolean indicating if file is allowed
+    :return: Boolean indicating if the file is allowed
     """
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

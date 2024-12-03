@@ -9,7 +9,7 @@ def upload():
     Handle image upload
     :return: JSON response with upload details
     """
-    # Check if file is present
+    # Check if the file is present
     if 'file' not in request.files:
         return jsonify({
             'success': False,
