@@ -1,11 +1,10 @@
-import io
-import json
-import os
-import pytest
+from flask.testing import FlaskClient
 
 
-def test_check_status(client, temp_image):
-    """Test status checking endpoint."""
+def test_check_status(client: 'FlaskClient', temp_image: str):
+    """
+    Test status checking endpoint.
+    """
     # First, upload an image
     upload_data = {
         'file': (temp_image, 'test_image.png')
@@ -13,7 +12,8 @@ def test_check_status(client, temp_image):
     upload_response = client.post(
         '/api/upload',
         content_type='multipart/form-data',
-        data=upload_data)
+        data=upload_data
+    )
     upload_json = upload_response.get_json()
     image_id = upload_json['image_id']
 
@@ -29,7 +29,7 @@ def test_check_status(client, temp_image):
     assert 'original_image_url' in json_response
 
 
-def test_download_nonexistent_image(client):
+def test_download_nonexistent_image(client: 'FlaskClient'):
     """Test downloading a nonexistent image."""
     response = client.get('/api/download/non_existent_id?type=original')
 
