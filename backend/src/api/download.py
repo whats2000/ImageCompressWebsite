@@ -20,6 +20,5 @@ def download(image_id):
 
     return send_file(
         result['filepath'],
-        as_attachment=True,
-        attachment_filename=result['filename']
+        as_attachment=True
     )

@@ -2,6 +2,9 @@ import os
 
 from PIL import Image
 
+from utils.jpeg_compression import jpeg_compression
+
+
 def compress_image(image_id: str, compression_format: str, compression_quality: int) -> dict:
     """
     Compress an image with specified parameters
@@ -33,9 +36,10 @@ def compress_image(image_id: str, compression_format: str, compression_quality: 
     try:
         # Open and compress image
         with Image.open(original_image_path) as img:
-            # TODO: Compress image
-
-            img.save(compressed_path)
+            if compression_format == 'jpeg':
+                jpeg_compression(img, compression_quality).save(compressed_path)
+            else:
+                img.save(compressed_path, format=compression_format, quality=compression_quality)
 
         return {
             'success': True,
