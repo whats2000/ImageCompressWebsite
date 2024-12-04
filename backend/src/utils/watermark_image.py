@@ -1,7 +1,7 @@
 from PIL import Image
 
 
-def add_watermark(image: Image.Image, watermark_text: str, position: str) -> Image.Image:
+def watermark_image(image: Image.Image, watermark_text: str, position: str) -> Image.Image:
     """
     Add watermark to an image
     :param image: PIL Image object
