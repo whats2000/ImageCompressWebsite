@@ -7,5 +7,6 @@ def add_watermark(image: Image.Image, watermark_text: str, position: str) -> Ima
     :param image: PIL Image object
     :param watermark_text: Text to use as watermark
     :param position: Position of the watermark applied to the image
+                     Which position in ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center']
     """
     return image
