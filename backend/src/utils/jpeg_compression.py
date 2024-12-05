@@ -25,13 +25,9 @@ class JPEGCompressor:
     def validate_input(image: Image.Image, quality: int):
         """
         Validate input parameters for JPEG compression
-
-        Args:
-            image (PIL.Image): Input image
-            quality (int): Compression quality
-
-        Raises:
-            ValueError: If input parameters are invalid
+        :param image: Input image
+        :param quality: Compression quality
+        :raises ValueError: If input parameters are invalid
         """
         # Check image input
         if image is None:
@@ -51,12 +47,8 @@ class JPEGCompressor:
     def rgb_to_ycbcr(image: Image.Image) -> np.ndarray:
         """
         Convert RGB image to YCbCr color space with precise coefficients
-
-        Args:
-            image (PIL.Image): Input image
-
-        Returns:
-            np.ndarray: YCbCr image
+        :param image: Input image
+        :return: YCbCr image
         """
         # Use standard ITU-R BT.601 coefficients
         img_array = np.array(image, dtype=np.float32) / 255.0
@@ -74,12 +66,8 @@ class JPEGCompressor:
     def ycbcr_to_rgb(ycbcr_img: np.ndarray) -> np.ndarray:
         """
         Convert YCbCr image back to RGB with precise inverse transformation
-
-        Args:
-            ycbcr_img (np.ndarray): YCbCr image
-
-        Returns:
-            np.ndarray: RGB image
+        :param ycbcr_img: YCbCr image
+        :return: RGB image
         """
         ycbcr = ycbcr_img / 255.0
 
@@ -95,12 +83,8 @@ class JPEGCompressor:
     def blockwise_dct(block: np.ndarray) -> np.ndarray:
         """
         Apply DCT to a single block
-
-        Args:
-            block (np.ndarray): Input block
-
-        Returns:
-            np.ndarray: DCT transformed block
+        :param block: Input block
+        :return: DCT transformed block
         """
         # Well, the manual DCT implementation will cost you a lot of time, try it out when you have time
         if not USE_MANUAL_DCT:
@@ -133,6 +117,8 @@ class JPEGCompressor:
     def blockwise_idct(block: np.ndarray) -> np.ndarray:
         """
         Apply inverse DCT to a single block
+        :param block: Input DCT block
+        :return: Inversed DCT block
         """
         return fftpack.idctn(block, type=2, norm='ortho')
 
@@ -140,13 +126,9 @@ class JPEGCompressor:
     def quantize_block(block: np.ndarray, quality: int) -> np.ndarray:
         """
         Quantize a DCT block using JPEG quantization matrix
-
-        Args:
-            block (np.ndarray): DCT block
-            quality (int): Compression quality
-
-        Returns:
-            np.ndarray: Quantized block
+        :param block: DCT block
+        :param quality: Compression quality
+        :return: Quantized block
         """
         # Calculate quantization matrix
         scale = 5000 / quality if quality < 50 else 200 - 2 * quality
@@ -157,13 +139,9 @@ class JPEGCompressor:
     def dequantize_block(block: np.ndarray, quality: int) -> np.ndarray:
         """
         Dequantize a quantized DCT block using JPEG quantization matrix
-
-        Args:
-            block (np.ndarray): Quantized DCT block
-            quality (int): Compression quality
-
-        Returns:
-            np.ndarray: Dequantized block
+        :param block: Quantized DCT block
+        :param quality: Compression quality
+        :return: Dequantized block
         """
         # Calculate quantization matrix
         scale = 5000 / quality if quality < 50 else 200 - 2 * quality
@@ -174,13 +152,9 @@ class JPEGCompressor:
     def get_compress_image(image: Image.Image, quality: int = 85) -> Image.Image:
         """
         Manually compress an image using JPEG-like compression
-
-        Args:
-            image (PIL.Image): Input image
-            quality (int): Compression quality (1-100)
-
-        Returns:
-            PIL.Image: Compressed image
+        :param image: Input image
+        :param quality: Compression quality (1-100), defaults to 85
+        :return: Compressed image
         """
         # Validate input
         ycbcr_img = JPEGCompressor.rgb_to_ycbcr(image)
@@ -233,12 +207,8 @@ class JPEGCompressor:
 def jpeg_compression(image: Image.Image, quality: int = 85) -> Image.Image:
     """
     Wrapper for JPEG compression
-
-    Args:
-        image (PIL.Image): Input image
-        quality (int, optional): Compression quality. Defaults to 85.
-
-    Returns:
-        PIL.Image: Compressed image
+    :param image: Input image
+    :param quality: Compression quality, defaults to 85
+    :return: Compressed image
     """
     return JPEGCompressor.get_compress_image(image, quality)
