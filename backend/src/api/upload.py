@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+
 from services.upload_service import upload_image
 
 upload_bp = Blueprint('upload', __name__)

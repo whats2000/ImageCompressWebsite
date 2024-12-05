@@ -1,7 +1,9 @@
 import os
-from PIL import Image, ImageDraw, ImageFont
+
+from PIL import Image
 
 from utils.watermark_image import watermark_image
+
 
 def add_watermark(image_id: str, watermark_text: str, position: str) -> dict:
     """

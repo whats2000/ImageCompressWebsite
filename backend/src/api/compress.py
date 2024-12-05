@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+
 from services.compress_service import compress_image
 
 compress_bp = Blueprint('compress', __name__)
