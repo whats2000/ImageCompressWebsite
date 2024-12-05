@@ -3,6 +3,7 @@ import math
 import numpy as np
 from PIL import Image
 from scipy import fftpack
+from tqdm import tqdm
 
 USE_MANUAL_DCT = False
 
@@ -49,8 +50,7 @@ class JPEGCompressor:
     @staticmethod
     def rgb_to_ycbcr(image: Image.Image) -> np.ndarray:
         """
-        Convert RGB image to YCbCr color space
-        This is used for quantization and DCT
+        Convert RGB image to YCbCr color space with precise coefficients
 
         Args:
             image (PIL.Image): Input image
@@ -58,27 +58,22 @@ class JPEGCompressor:
         Returns:
             np.ndarray: YCbCr image
         """
-        # Convert to a numpy array
-        img_array = np.array(image)
+        # Use standard ITU-R BT.601 coefficients
+        img_array = np.array(image, dtype=np.float32) / 255.0
 
-        # RGB to YCbCr conversion matrix
-        # Source:
-        # https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdprfx/b550d1b5-f7d9-4a0c-9141-b3dca9d7f525
-        ycbcr_matrix = np.array([
-            [0.299, 0.587, 0.114],
-            [-0.168935, -0.331665, 0.50059],
-            [0.499813, -0.418531, -0.081282]
-        ])
+        # Precise conversion to YCbCr
+        y = 0.299 * img_array[:, :, 0] + 0.587 * img_array[:, :, 1] + 0.114 * img_array[:, :, 2]
+        cb = -0.169 * img_array[:, :, 0] - 0.331 * img_array[:, :, 1] + 0.500 * img_array[:, :, 2] + 0.5
+        cr = 0.500 * img_array[:, :, 0] - 0.419 * img_array[:, :, 1] - 0.081 * img_array[:, :, 2] + 0.5
 
-        # Shift values
-        shift = np.array([0, 128, 128])
-
-        return np.tensordot(img_array, ycbcr_matrix.T, axes=([2], [1])) + shift
+        # Stack and scale back to 0-255
+        ycbcr_img = np.stack([y, cb, cr], axis=-1) * 255.0
+        return np.clip(ycbcr_img, 0, 255).astype(np.float32)
 
     @staticmethod
     def ycbcr_to_rgb(ycbcr_img: np.ndarray) -> np.ndarray:
         """
-        Convert YCbCr image to RGB color space
+        Convert YCbCr image back to RGB with precise inverse transformation
 
         Args:
             ycbcr_img (np.ndarray): YCbCr image
@@ -86,20 +81,15 @@ class JPEGCompressor:
         Returns:
             np.ndarray: RGB image
         """
-        # YCbCr to RGB conversion matrix
-        # Source:
-        # https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdprfx/b550d1b5-f7d9-4a0c-9141-b3dca9d7f525
-        ycbcr_matrix = np.array([
-            [0.299, 0.587, 0.114],
-            [-0.168935, -0.331665, 0.50059],
-            [0.499813, -0.418531, -0.081282]
-        ])
-        rgb_matrix = np.linalg.inv(ycbcr_matrix)
+        ycbcr = ycbcr_img / 255.0
 
-        # Unshift values
-        shift = np.array([0, -128, -128])
+        # Inverse transformation
+        r = ycbcr[:, :, 0] + 1.402 * (ycbcr[:, :, 2] - 0.5)
+        g = ycbcr[:, :, 0] - 0.34414 * (ycbcr[:, :, 1] - 0.5) - 0.71414 * (ycbcr[:, :, 2] - 0.5)
+        b = ycbcr[:, :, 0] + 1.772 * (ycbcr[:, :, 1] - 0.5)
 
-        return np.clip(np.tensordot(ycbcr_img + shift, rgb_matrix.T, axes=([2], [0])), 0, 255).astype(np.uint8)
+        rgb_img = np.stack([r, g, b], axis=-1)
+        return np.clip(rgb_img * 255.0, 0, 255).astype(np.uint8)
 
     @staticmethod
     def blockwise_dct(block: np.ndarray) -> np.ndarray:
@@ -203,7 +193,7 @@ class JPEGCompressor:
 
         # Split image into 8x8 blocks and for each channel
         channels = []
-        for c in range(3):
+        for c in tqdm(range(3), desc="Compressing", leave=False):
             # Extract 8x8 blocks
             blocks = [
                 padded_img[i:i + 8, j:j + 8, c]
@@ -252,11 +242,3 @@ def jpeg_compression(image: Image.Image, quality: int = 85) -> Image.Image:
         PIL.Image: Compressed image
     """
     return JPEGCompressor.get_compress_image(image, quality)
-
-
-if __name__ == '__main__':
-    # Example usage
-    input_image = Image.open('example.png')
-    compressed_image = jpeg_compression(input_image, quality=85)
-    compressed_image.save('compressed_example.jpg')
-    compressed_image.show()

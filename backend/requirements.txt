@@ -7,3 +7,4 @@ werkzeug
 pytest
 numpy
 scipy
+tqdm
