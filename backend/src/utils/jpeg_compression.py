@@ -47,7 +47,7 @@ class JPEGCompressor:
             raise ValueError(f"Quality must be between 1 and 100, got {quality}")
 
     @staticmethod
-    def rgb_to_ycbcrt(image: Image.Image) -> np.ndarray:
+    def rgb_to_ycbcr(image: Image.Image) -> np.ndarray:
         """
         Convert RGB image to YCbCr color space
         This is used for quantization and DCT
@@ -70,13 +70,10 @@ class JPEGCompressor:
             [0.499813, -0.418531, -0.081282]
         ])
 
-        # Apply conversion
-        ycbcr_img = np.dot(img_array, ycbcr_matrix.T)
-
         # Shift values
         shift = np.array([0, 128, 128])
 
-        return np.clip(ycbcr_img + shift, 0, 255).astype(np.uint8)
+        return np.tensordot(img_array, ycbcr_matrix.T, axes=([2], [1])) + shift
 
     @staticmethod
     def ycbcr_to_rgb(ycbcr_img: np.ndarray) -> np.ndarray:
@@ -99,14 +96,10 @@ class JPEGCompressor:
         ])
         rgb_matrix = np.linalg.inv(ycbcr_matrix)
 
-        # Shift values
+        # Unshift values
         shift = np.array([0, -128, -128])
 
-        # Apply conversion
-        rgb_img = ycbcr_img - shift
-        rgb_img = np.dot(rgb_img, rgb_matrix.T)
-
-        return np.clip(rgb_img, 0, 255).astype(np.uint8)
+        return np.clip(np.tensordot(ycbcr_img + shift, rgb_matrix.T, axes=([2], [0])), 0, 255).astype(np.uint8)
 
     @staticmethod
     def blockwise_dct(block: np.ndarray) -> np.ndarray:
@@ -147,6 +140,13 @@ class JPEGCompressor:
         return dct_block
 
     @staticmethod
+    def blockwise_idct(block: np.ndarray) -> np.ndarray:
+        """
+        Apply inverse DCT to a single block
+        """
+        return fftpack.idctn(block, type=2, norm='ortho')
+
+    @staticmethod
     def quantize_block(block: np.ndarray, quality: int) -> np.ndarray:
         """
         Quantize a DCT block using JPEG quantization matrix
@@ -159,11 +159,26 @@ class JPEGCompressor:
             np.ndarray: Quantized block
         """
         # Calculate quantization matrix
-        quality_factor = 5000 / quality if quality < 50 else 200 - 2 * quality
-        quant_matrix = np.floor((JPEGCompressor.QUANTIZATION_MATRIX * quality_factor + 50) / 100)
-
-        # Apply quantization
+        scale = 5000 / quality if quality < 50 else 200 - 2 * quality
+        quant_matrix = np.clip((JPEGCompressor.QUANTIZATION_MATRIX * scale + 50) // 100, 1, 255)
         return np.round(block / quant_matrix).astype(int)
+
+    @staticmethod
+    def dequantize_block(block: np.ndarray, quality: int) -> np.ndarray:
+        """
+        Dequantize a quantized DCT block using JPEG quantization matrix
+
+        Args:
+            block (np.ndarray): Quantized DCT block
+            quality (int): Compression quality
+
+        Returns:
+            np.ndarray: Dequantized block
+        """
+        # Calculate quantization matrix
+        scale = 5000 / quality if quality < 50 else 200 - 2 * quality
+        quant_matrix = np.clip((JPEGCompressor.QUANTIZATION_MATRIX * scale + 50) // 100, 1, 255)
+        return block * quant_matrix
 
     @staticmethod
     def get_compress_image(image: Image.Image, quality: int = 85) -> Image.Image:
@@ -178,46 +193,50 @@ class JPEGCompressor:
             PIL.Image: Compressed image
         """
         # Validate input
-        JPEGCompressor.validate_input(image, quality)
+        ycbcr_img = JPEGCompressor.rgb_to_ycbcr(image)
 
-        # Convert image to YCbCr color space
-        ycbcr_img = JPEGCompressor.rgb_to_ycbcrt(image)
+        # Add padding to image
+        h, w, _ = ycbcr_img.shape
+        padded_h = (h + 7) // 8 * 8
+        padded_w = (w + 7) // 8 * 8
+        padded_img = np.pad(ycbcr_img, ((0, padded_h - h), (0, padded_w - w), (0, 0)), mode='constant')
 
-        # Padding to ensure 8x8 blocks
-        width, height = ycbcr_img.shape[1], ycbcr_img.shape[0]
-        new_width = (width + 7) // 8 * 8
-        new_height = (height + 7) // 8 * 8
-        padding_image = np.zeros((new_height, new_width, 3), dtype=np.uint8)
-        padding_image[:height, :width] = ycbcr_img
+        # Split image into 8x8 blocks and for each channel
+        channels = []
+        for c in range(3):
+            # Extract 8x8 blocks
+            blocks = [
+                padded_img[i:i + 8, j:j + 8, c]
+                for i in range(0, padded_img.shape[0], 8)
+                for j in range(0, padded_img.shape[1], 8)
+            ]
 
-        # Split image into blocks
-        blocks = np.array([
-            padding_image[i:i + 8, j:j + 8]
-            for i in range(0, padding_image.shape[0], 8)
-            for j in range(0, padding_image.shape[1], 8)
-        ])
+            # Apply DCT
+            quantized_blocks = [
+                JPEGCompressor.quantize_block(JPEGCompressor.blockwise_dct(block), quality)
+                for block in blocks
+            ]
 
-        # Apply DCT and quantization to each block
-        quantized_blocks = np.array([
-            JPEGCompressor.quantize_block(JPEGCompressor.blockwise_dct(block), quality)
-            for block in blocks
-        ])
+            # Apply inverse DCT
+            reconstructed_blocks = [
+                JPEGCompressor.blockwise_idct(JPEGCompressor.dequantize_block(block, quality))
+                for block in quantized_blocks
+            ]
 
-        # Reconstruct image from quantized blocks
-        ycbcr_reconstructed = np.zeros_like(padding_image)
-
-        for i, block in enumerate(quantized_blocks):
-            x = (i // (padding_image.shape[1] // 8)) * 8
-            y = (i % (padding_image.shape[1] // 8)) * 8
-            ycbcr_reconstructed[x:x + 8, y:y + 8] = block
+            # Reconstruct channel
+            reconstructed_channel = np.zeros_like(padded_img[:, :, 0])
+            for idx, block in enumerate(reconstructed_blocks):
+                i = (idx // (padded_w // 8)) * 8
+                j = (idx % (padded_w // 8)) * 8
+                reconstructed_channel[i:i + 8, j:j + 8] = block
+            channels.append(reconstructed_channel)
 
         # Remove padding
-        ycbcr_reconstructed_clipped = ycbcr_reconstructed[:height, :width]
+        reconstructed_img = np.stack(channels, axis=2)[:h, :w]
 
-        # Convert back to RGB color space
-        rgb_img = JPEGCompressor.ycbcr_to_rgb(ycbcr_reconstructed_clipped)
-
-        return Image.fromarray(rgb_img, 'RGB')
+        # Convert back to RGB
+        rgb_img = JPEGCompressor.ycbcr_to_rgb(reconstructed_img)
+        return Image.fromarray(rgb_img)
 
 
 # Export function to match the expected interface
@@ -233,3 +252,11 @@ def jpeg_compression(image: Image.Image, quality: int = 85) -> Image.Image:
         PIL.Image: Compressed image
     """
     return JPEGCompressor.get_compress_image(image, quality)
+
+
+if __name__ == '__main__':
+    # Example usage
+    input_image = Image.open('example.png')
+    compressed_image = jpeg_compression(input_image, quality=85)
+    compressed_image.save('compressed_example.jpg')
+    compressed_image.show()
