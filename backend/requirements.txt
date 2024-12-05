@@ -6,3 +6,4 @@ uuid
 werkzeug
 pytest
 numpy
+scipy
