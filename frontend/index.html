@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compress</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-left">
+                <img src="img/logo_removebg.png" alt="Logo" class="nav-logo">
+                <span class="brand-text">IMAGE COMPRESS</span>
+            </div>
+            <div class="nav-right">
+                <a href="#" class="nav-link">IMAGE COMPRESS</a>
+                <div class="dropdown">
+                    <a href="#" class="nav-link">MORE ▼</a>
+                    <div class="dropdown-content">
+                        <a href="#">About</a>
+                        <a href="#">Contact Us</a>
+                        <a href="#">Privacy</a>
+                        <a href="#">Terms</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="upload-section">
+            <h2>Compress Your Images</h2>
+            <div class="upload-container">
+                <input type="file" id="file-upload" accept="image/*" multiple>
+                <label for="file-upload" class="custom-file-upload">
+                    Choose Files
+                </label>
+            </div>
+            <div id="file-list"></div>
+            <div class="compression-options">
+                <h3>Compression Options</h3>
+                <label for="quality">Quality:</label>
+                <input type="range" id="quality" min="0" max="100" value="80">
+                <span id="quality-value">80%</span>
+            </div>
+            <button id="compress-btn">Compress Images</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Image Compress. All rights reserved.</p>
+    </footer>
+</body>
+</html>
