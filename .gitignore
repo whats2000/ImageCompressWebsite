@@ -32,3 +32,6 @@ venv/
 /backend/compressed
 /backend/uploads
 /backend/watermarked
+
+
+/frontend/todo.md

@@ -270,31 +270,32 @@ footer {
 }
 
 .preview-area {
-    margin-top: 2rem;
-    padding: 2rem;
-    border-radius: 10px;
-    background-color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 120px; /* Extra space before footer */
+    width: 45%; /* Adjust as needed (e.g., 60%, 70%) */
+    max-width: 600px; /* Set a maximum width */
+    margin: 2rem auto; /* Center the panel */
+    padding: 1rem; /* Decrease padding */
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .image-previews {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
-    margin: 1rem 0;
+    width: 100%;
 }
 
 .image-preview {
-    padding: 0.5rem;
+    position: relative;
+    overflow: hidden;
     border: 1px solid #ddd;
     border-radius: 4px;
     text-align: center;
 }
 
 .image-preview img {
-    max-width: 100%;
+    width: 100%;
     height: auto;
+    display: block;
     border-radius: 4px;
 }
 
@@ -304,6 +305,22 @@ footer {
     color: #666;
 }
 
+/* Dynamic Grid Columns */
+.image-previews.one-image {
+    grid-template-columns: 1fr;
+}
+
+.image-previews.two-images {
+    grid-template-columns: 1fr 1fr;
+}
+
+.image-previews.three-images {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.image-previews.four-or-more-images {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
 
 .footer {
     position: fixed;

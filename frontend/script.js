@@ -49,24 +49,54 @@ document.addEventListener('DOMContentLoaded', () => {
         
         previewArea.style.display = 'block';
         imagePreviews.innerHTML = '';
-    
-        Array.from(files).forEach(file => {
-            if (file.type === 'image/jpeg' || file.type === 'image/webp') {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.createElement('div');
-                    preview.className = 'image-preview';
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" alt="${file.name}">
-                        <p>${file.name}</p>
-                    `;
-                    imagePreviews.appendChild(preview);
-                };
-                reader.readAsDataURL(file);
-            } else {
+        
+        const validFiles = Array.from(files).filter(file => {
+            const isValidType = file.type === 'image/jpeg' || file.type === 'image/webp';
+            if (!isValidType) {
                 alert(`Unsupported file type: ${file.name}. Please upload JPEG or WebP images.`);
             }
+            return isValidType;
         });
+    
+        if (validFiles.length === 0) {
+            previewArea.style.display = 'none';
+            return;
+        }
+    
+        // Apply dynamic class based on number of images
+        imagePreviews.classList.remove('one-image', 'two-images', 'three-images', 'four-or-more-images');
+    
+        switch (validFiles.length) {
+            case 1:
+                imagePreviews.classList.add('one-image');
+                break;
+            case 2:
+                imagePreviews.classList.add('two-images');
+                break;
+            case 3:
+                imagePreviews.classList.add('three-images');
+                break;
+            default:
+                imagePreviews.classList.add('four-or-more-images');
+                break;
+        }
+    
+        validFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="${file.name}">
+                    <p>${file.name}</p>
+                `;
+                imagePreviews.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        });
+    
+        // Enable Compress Button
+        compressBtn.disabled = false;
     }
     
 });
