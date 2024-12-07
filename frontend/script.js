@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dropZone.addEventListener(eventName, preventDefaults, false);
     });
 
+    handleQualitySlider();
+
     function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    handleQualitySlider();
+    
 });
 
 // Footer Control
@@ -83,22 +85,28 @@ window.addEventListener('scroll', () => {
     }
 });
 
+// Quality Slider Functionality
 function handleQualitySlider() {
-    // Add debugging to check elements
+    // Select elements
     const qualitySlider = document.getElementById('qualitySlider');
     const qualityValue = document.getElementById('qualityValue');
 
+    // Check if elements exist
     if (!qualitySlider || !qualityValue) {
         console.error('Quality slider elements not found');
         return;
     }
 
-    // Set initial value
+    // Set initial value display
     qualityValue.textContent = `${qualitySlider.value}%`;
 
-    // Add event listener with debugging
+    // Add event listener to update value display and log changes
     qualitySlider.addEventListener('input', (event) => {
-        console.log('Slider value changed:', event.target.value);
-        qualityValue.textContent = `${event.target.value}%`;
+        const value = event.target.value;
+        console.log('Slider value changed:', value);
+        qualityValue.textContent = `${value}%`;
+        
+        // Optional: Store the value for compression logic
+        window.compressionQuality = value / 100;
     });
 }
