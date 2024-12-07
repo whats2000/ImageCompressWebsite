@@ -49,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         previewArea.style.display = 'block';
         imagePreviews.innerHTML = '';
-
+    
         Array.from(files).forEach(file => {
-            if (file.type.startsWith('image/')) {
+            if (file.type === 'image/jpeg' || file.type === 'image/webp') {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const preview = document.createElement('div');
@@ -63,10 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     imagePreviews.appendChild(preview);
                 };
                 reader.readAsDataURL(file);
+            } else {
+                alert(`Unsupported file type: ${file.name}. Please upload JPEG or WebP images.`);
             }
         });
     }
-
     
 });
 

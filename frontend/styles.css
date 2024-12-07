@@ -154,6 +154,10 @@ input[type="file"] {
     border-radius: 4px;
 }
 
+.compress-section p {
+    font-size: 1.5rem; /* Adjust the value as needed */
+}
+
 .compression-options {
     margin-top: 1rem;
 }
