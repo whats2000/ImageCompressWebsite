@@ -1,5 +1,9 @@
 import os
-from PIL import Image, ImageDraw, ImageFont
+
+from PIL import Image
+
+from utils.watermark_image import watermark_image
+
 
 def add_watermark(image_id: str, watermark_text: str, position: str) -> dict:
     """
@@ -44,10 +48,8 @@ def add_watermark(image_id: str, watermark_text: str, position: str) -> dict:
     try:
         # Open image
         with Image.open(image_path) as img:
-            # TODO: Add watermark to image
-            
-            # Save watermarked image
-            img.save(watermarked_path)
+            # Add watermark
+            watermark_image(img, watermark_text, position).save(watermarked_path)
 
         return {
             'success': True,

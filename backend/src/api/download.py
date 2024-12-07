@@ -1,4 +1,5 @@
 from flask import Blueprint, send_file, request, jsonify
+
 from services.download_service import get_downloadable_image
 
 download_bp = Blueprint('download', __name__)
@@ -20,6 +21,5 @@ def download(image_id):
 
     return send_file(
         result['filepath'],
-        as_attachment=True,
-        attachment_filename=result['filename']
+        as_attachment=True
     )

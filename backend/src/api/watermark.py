@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+
 from services.watermark_service import add_watermark
 
 watermark_bp = Blueprint('watermark', __name__)

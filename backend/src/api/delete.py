@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+
 from services.delete_service import delete_image
 
 delete_bp = Blueprint('delete', __name__)
