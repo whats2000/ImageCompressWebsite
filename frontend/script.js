@@ -386,20 +386,20 @@ document.addEventListener('click', (e) => {
 
 // Function to delete an image
 function deleteImage(imageId) {
-    fetch(`${backend_api}/api/delete/${imageId}`, {
+    fetch(`${backend_api}/api/delete/${encodeURIComponent(imageId)}`, {
         method: 'DELETE',
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Remove image preview from UI
-            const preview = document.querySelector(`.image-preview[data-image-id="${imageId}"]`);
-            if (preview) {
-                preview.remove();
+            window.uploadedImages = window.uploadedImages.filter(image => image.imageId !== imageId);
+            const previewElement = document.querySelector(`.image-preview[data-image-id="${imageId}"]`);
+            if (previewElement) {
+                previewElement.remove();
             }
-            alert('Image deleted successfully.');
+            alert(data.message);
         } else {
-            alert('Failed to delete image: ' + data.message);
+            alert(`Failed to delete image: ${data.message}`);
         }
     })
     .catch(error => {
@@ -407,6 +407,7 @@ function deleteImage(imageId) {
         alert('An error occurred while deleting the image.');
     });
 }
+
 
 // Function to check processing status of an image
 function checkProcessingStatus(imageId) {
