@@ -5,6 +5,8 @@ from PIL import Image
 from scipy import fftpack
 from tqdm import tqdm
 
+from utils.image_validation import validate_compression_input
+
 USE_MANUAL_DCT = False
 
 
@@ -20,28 +22,6 @@ class JPEGCompressor:
         [49, 64, 78, 87, 103, 121, 120, 101],
         [72, 92, 95, 98, 112, 100, 103, 99]
     ])
-
-    @staticmethod
-    def validate_input(image: Image.Image, quality: int):
-        """
-        Validate input parameters for JPEG compression
-        :param image: Input image
-        :param quality: Compression quality
-        :raises ValueError: If input parameters are invalid
-        """
-        # Check image input
-        if image is None:
-            raise ValueError("Input image cannot be None")
-
-        if not isinstance(image, Image.Image):
-            raise TypeError(f"Expected PIL Image, got {type(image)}")
-
-        # Validate quality parameter
-        if not isinstance(quality, int):
-            raise TypeError(f"Quality must be an integer, got {type(quality)}")
-
-        if quality < 1 or quality > 100:
-            raise ValueError(f"Quality must be between 1 and 100, got {quality}")
 
     @staticmethod
     def rgb_to_ycbcr(image: Image.Image) -> np.ndarray:
@@ -157,6 +137,8 @@ class JPEGCompressor:
         :return: Compressed image
         """
         # Validate input
+        validate_compression_input(image, quality)
+
         ycbcr_img = JPEGCompressor.rgb_to_ycbcr(image)
 
         # Add padding to image
