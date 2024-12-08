@@ -356,7 +356,7 @@ input[type="range"] {
     border-radius: 4px;
 }
 
-#addWatermarkBtn {
+.function-button {
     padding: 0.5rem 1rem;
     background-color: var(--primary-color);
     color: white;
@@ -366,11 +366,11 @@ input[type="range"] {
     transition: background-color 0.3s;
 }
 
-#addWatermarkBtn:disabled {
+/* .function-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-}
+} */
 
-#addWatermarkBtn:hover:not(:disabled) {
+#function-button:hover:not(:disabled) {
     background-color: #0056b3; /* Darker shade for hover */
 }

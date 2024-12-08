@@ -1,5 +1,7 @@
 # Image Compression Website - System Requirements
 
+Running on http://127.0.0.1:5000
+
 ### **API Design (Including Upload and Download)**
 
 #### 1. **Upload Image**
