@@ -2,13 +2,11 @@ import numpy as np
 from PIL import Image
 from scipy import fftpack
 from tqdm import tqdm
-
 from utils.image_validation import validate_compression_input
 
 
 class WebPCompressor:
     # Block sizes for different prediction types
-    LUMA_4x4 = 4
     LUMA_16x16 = 16
     CHROMA_8x8 = 8
 
@@ -32,6 +30,26 @@ class WebPCompressor:
         [1.0, 2.03211, 0.0]
     ], dtype=np.float32)
 
+    # Base quantization matrix (similar to JPEG but adapted for WebP)
+    BASE_QUANTIZATION_MATRIX = np.array([
+        [16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55],
+        [14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62],
+        [18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92],
+        [49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99],
+        [16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55],
+        [14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62],
+        [18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92],
+        [49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99],
+        [16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55],
+        [14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62],
+        [18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92],
+        [49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99],
+        [16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55],
+        [14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62],
+        [18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92],
+        [49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99]
+    ], dtype=np.float32)
+
     @staticmethod
     def rgb_to_yuv(image: Image.Image) -> np.ndarray:
         """
@@ -39,19 +57,11 @@ class WebPCompressor:
         :param image: Input image
         :return: YUV image
         """
-        # Convert image to float32 array and normalize
         img_array = np.array(image, dtype=np.float32) / 255.0
-        
-        # Reshape for matrix multiplication
         pixels = img_array.reshape(-1, 3)
-        
-        # Convert using matrix multiplication
         yuv_pixels = np.dot(pixels, WebPCompressor.RGB_TO_YUV.T)
-        
-        # Reshape back and adjust UV components
         yuv_img = yuv_pixels.reshape(img_array.shape)
         yuv_img[:, :, 1:] += 0.5
-        
         return np.clip(yuv_img * 255.0, 0, 255).astype(np.float32)
 
     @staticmethod
@@ -61,102 +71,110 @@ class WebPCompressor:
         :param yuv_img: YUV image
         :return: RGB image
         """
-        # Normalize and adjust UV components
         yuv = yuv_img.astype(np.float32) / 255.0
         yuv[:, :, 1:] -= 0.5
-        
-        # Reshape for matrix multiplication
         pixels = yuv.reshape(-1, 3)
-        
-        # Convert using matrix multiplication
         rgb_pixels = np.dot(pixels, WebPCompressor.YUV_TO_RGB.T)
-        
-        # Reshape back and clip values
         rgb_img = rgb_pixels.reshape(yuv_img.shape)
         return np.clip(rgb_img * 255.0, 0, 255).astype(np.uint8)
 
     @staticmethod
-    def predict_blocks_vectorized(blocks: np.ndarray, left_cols: np.ndarray, top_rows: np.ndarray) -> tuple:
+    def get_quantization_matrix(quality: int, block_size: int) -> np.ndarray:
         """
-        Vectorized prediction for multiple blocks simultaneously
-        :param blocks: Input blocks [N, height, width]
-        :param left_cols: Left columns [N, height]
-        :param top_rows: Top rows [N, width]
-        :return: tuple of (best predictions, best modes)
+        Get quantization matrix adjusted for quality
+        :param quality: Compression quality (1-100)
+        :param block_size: Size of the block
+        :return: Quantization matrix
         """
-        n_blocks = len(blocks)
-        block_h, block_w = blocks[0].shape
-        predictions = np.zeros((4, n_blocks, block_h, block_w), dtype=np.float32)
+        # Ensure quality is in valid range
+        quality = np.clip(quality, 1, 100)
         
-        # H_PRED: broadcast left columns
-        predictions[0] = left_cols[:, :, np.newaxis]
+        # Get the base quantization matrix for the block size
+        if block_size == WebPCompressor.LUMA_16x16:
+            base_matrix = WebPCompressor.BASE_QUANTIZATION_MATRIX
+        else:  # For chroma blocks
+            base_matrix = WebPCompressor.BASE_QUANTIZATION_MATRIX[:8, :8]
         
-        # V_PRED: broadcast top rows
-        predictions[1] = top_rows[:, np.newaxis, :]
+        # Scale factor based on quality
+        if quality < 50:
+            scale = 5000 / quality
+        else:
+            scale = 200 - 2 * quality
+            
+        # Apply quality scaling
+        factor = scale / 100.0
+        q_matrix = base_matrix * factor
         
-        # DC_PRED: mean of left and top
-        dc_vals = np.mean(np.concatenate([left_cols, top_rows], axis=1), axis=1)
-        predictions[2] = dc_vals[:, np.newaxis, np.newaxis]
+        # Ensure minimum quantization values
+        q_matrix = np.maximum(q_matrix, 1)
         
-        # TM_PRED: vectorized true motion prediction
-        top_left = top_rows[:, 0][:, np.newaxis, np.newaxis]
-        left_cols_expanded = left_cols[:, :, np.newaxis]
-        top_rows_expanded = top_rows[:, np.newaxis, :]
-        predictions[3] = np.clip(
-            left_cols_expanded + top_rows_expanded - top_left,
-            0, 255
-        )
+        # Special handling for high quality
+        if quality >= 90:
+            # Reduce quantization values for high quality
+            q_matrix = q_matrix * (100 - quality) / 50.0
+            q_matrix = np.maximum(q_matrix, 1)
         
-        # Calculate errors for all predictions
-        errors = np.sum(
-            np.abs(predictions - blocks[np.newaxis, :, :, :]),
-            axis=(2, 3)
-        )
-        
-        # Get best predictions and modes
-        best_modes = np.argmin(errors, axis=0)
-        best_predictions = np.take_along_axis(
-            predictions,
-            best_modes[np.newaxis, :, np.newaxis, np.newaxis],
-            axis=0
-        ).squeeze(0)
-        
-        return best_predictions, best_modes
+        return q_matrix
 
     @staticmethod
-    def process_blocks_vectorized(blocks: np.ndarray, quality: int) -> np.ndarray:
+    def predict_block(block: np.ndarray, left_col: np.ndarray, top_row: np.ndarray) -> tuple:
         """
-        Vectorized processing of multiple blocks
-        :param blocks: Input blocks [N, height, width]
-        :param quality: Compression quality
-        :return: Processed blocks
+        Predict block using all available modes
+        :param block: Input block
+        :param left_col: Left column pixels
+        :param top_row: Top row pixels
+        :return: tuple of (best prediction, best mode)
         """
-        # Apply DCT to all blocks at once
-        transformed = fftpack.dctn(blocks, type=2, norm='ortho', axes=(1, 2))
+        height, width = block.shape
+        predictions = np.zeros((4, height, width), dtype=np.float32)
+
+        # H_PRED
+        predictions[0] = left_col[:, np.newaxis].repeat(width, axis=1)
         
-        # Calculate quantization factor
-        base_q = np.clip(quality, 1, 100)
-        q_factor = (100 - base_q) / 50.0 if base_q >= 50 else 50.0 / base_q
+        # V_PRED
+        predictions[1] = top_row[np.newaxis, :].repeat(height, axis=0)
         
-        # Create quantization matrix
-        quant_matrix = np.ones_like(blocks[0]) * q_factor
-        quant_matrix[0, 0] *= 0.6  # Preserve more DC coefficient
+        # DC_PRED
+        dc_val = np.mean(np.concatenate([left_col, top_row]))
+        predictions[2].fill(dc_val)
         
-        # Quantize all blocks
-        quantized = np.round(transformed / quant_matrix)
+        # TM_PRED
+        gradient = top_row - top_row[0]
+        predictions[3] = left_col[:, np.newaxis] + gradient[np.newaxis, :]
+        predictions[3] = np.clip(predictions[3], 0, 255)
+
+        # Calculate errors
+        errors = np.sum(np.abs(predictions - block[np.newaxis, :, :]), axis=(1, 2))
+        best_mode = np.argmin(errors)
         
-        # Dequantize all blocks
-        dequantized = quantized * quant_matrix
+        return predictions[best_mode], best_mode
+
+    @staticmethod
+    def process_block(block: np.ndarray, q_matrix: np.ndarray) -> np.ndarray:
+        """
+        Process a single block (DCT, quantize, inverse)
+        :param block: Input block
+        :param q_matrix: Quantization matrix
+        :return: Processed block
+        """
+        # Apply DCT
+        dct_block = fftpack.dctn(block - 128.0, type=2, norm='ortho')
         
-        # Inverse transform all blocks
-        reconstructed = fftpack.idctn(dequantized, type=2, norm='ortho', axes=(1, 2))
+        # Quantize
+        quantized = np.round(dct_block / q_matrix)
         
-        return reconstructed
+        # Dequantize
+        dequantized = quantized * q_matrix
+        
+        # Inverse DCT
+        idct_block = fftpack.idctn(dequantized, type=2, norm='ortho')
+        
+        return np.clip(idct_block + 128.0, 0, 255)
 
     @staticmethod
     def compress_channel(channel: np.ndarray, quality: int, block_size: int = 16) -> np.ndarray:
         """
-        Optimized channel compression using vectorized operations
+        Compress a single channel
         :param channel: Input channel
         :param quality: Compression quality
         :param block_size: Size of processing blocks
@@ -167,66 +185,43 @@ class WebPCompressor:
         padded_w = ((width + block_size - 1) // block_size) * block_size
         
         # Pad the channel
-        padded = np.pad(
-            channel,
-            ((0, padded_h - height), (0, padded_w - width)),
-            mode='edge'  # Use edge padding instead of constant
-        )
+        padded = np.pad(channel, 
+                       ((0, padded_h - height), (0, padded_w - width)),
+                       mode='edge')
+
+        # Get quantization matrix
+        q_matrix = WebPCompressor.get_quantization_matrix(quality, block_size)
         
-        # Extract blocks, left columns, and top rows
-        blocks = []
-        left_cols = []
-        top_rows = []
-        
-        for i in range(0, padded_h, block_size):
-            for j in range(0, padded_w, block_size):
-                blocks.append(padded[i:i+block_size, j:j+block_size])
-                left_cols.append(
-                    padded[i:i+block_size, j-1] if j > 0
-                    else np.zeros(block_size)
-                )
-                top_rows.append(
-                    padded[i-1, j:j+block_size] if i > 0
-                    else np.zeros(block_size)
-                )
-        
-        # Convert to numpy arrays
-        blocks = np.array(blocks)
-        left_cols = np.array(left_cols)
-        top_rows = np.array(top_rows)
-        
-        # Predict blocks
-        predictions, _ = WebPCompressor.predict_blocks_vectorized(
-            blocks, left_cols, top_rows
-        )
-        
-        # Calculate residuals
-        residuals = blocks - predictions
-        
-        # Process residuals
-        reconstructed_residuals = WebPCompressor.process_blocks_vectorized(
-            residuals, quality
-        )
-        
-        # Reconstruct blocks
-        reconstructed_blocks = predictions + reconstructed_residuals
-        
-        # Reassemble the channel
+        # Process blocks
         result = np.zeros_like(padded)
-        block_idx = 0
+        
         for i in range(0, padded_h, block_size):
             for j in range(0, padded_w, block_size):
-                result[i:i+block_size, j:j+block_size] = reconstructed_blocks[block_idx]
-                block_idx += 1
+                block = padded[i:i+block_size, j:j+block_size]
+                
+                # Get prediction context
+                top_row = padded[i-1, j:j+block_size] if i > 0 else np.zeros(block_size)
+                left_col = padded[i:i+block_size, j-1] if j > 0 else np.zeros(block_size)
+                
+                # Get best prediction
+                predicted, _ = WebPCompressor.predict_block(block, left_col, top_row)
+                
+                # Calculate and process residual
+                residual = block - predicted
+                processed_residual = WebPCompressor.process_block(residual, q_matrix)
+                
+                # Reconstruct block
+                result[i:i+block_size, j:j+block_size] = np.clip(
+                    predicted + processed_residual, 0, 255
+                )
         
-        # Remove padding and clip values
-        result = result[:height, :width]
-        return np.clip(result, 0, 255)
+        # Remove padding
+        return result[:height, :width]
 
     @staticmethod
     def get_compress_image(image: Image.Image, quality: int = 85) -> Image.Image:
         """
-        Compress an image using optimized WebP-like compression
+        Compress an image using WebP-like compression
         :param image: Input image
         :param quality: Compression quality (1-100), defaults to 85
         :return: Compressed image
@@ -237,19 +232,19 @@ class WebPCompressor:
         # Convert to YUV color space
         yuv_img = WebPCompressor.rgb_to_yuv(image)
 
-        # Process each channel with vectorized operations
+        # Process channels
         channels = []
         for i, channel in enumerate(tqdm(np.dsplit(yuv_img, 3), desc="Compressing", total=3)):
             # Use different block sizes for luma (Y) and chroma (U,V)
             block_size = WebPCompressor.LUMA_16x16 if i == 0 else WebPCompressor.CHROMA_8x8
             compressed = WebPCompressor.compress_channel(
-                channel.squeeze(),
+                channel.squeeze(), 
                 quality,
                 block_size
             )
             channels.append(compressed)
 
-        # Stack channels and convert back to RGB
+        # Reconstruct and convert back to RGB
         reconstructed = np.stack(channels, axis=-1)
         rgb_img = WebPCompressor.yuv_to_rgb(reconstructed)
         
@@ -264,3 +259,15 @@ def webp_compression(image: Image.Image, quality: int = 85) -> Image.Image:
     :return: Compressed image
     """
     return WebPCompressor.get_compress_image(image, quality)
+
+
+if __name__ == '__main__':
+    # Test the WebP compression
+    test_image = Image.open('tests/test.png')
+    
+    # Test different quality levels
+    qualities = [25, 50, 75, 100]
+    for q in qualities:
+        compressed = webp_compression(test_image, quality=q)
+        compressed.save(f'tests/compressed_q{q}.webp')
+        print(f"Compression completed for quality {q}")

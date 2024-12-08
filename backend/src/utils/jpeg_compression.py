@@ -194,3 +194,15 @@ def jpeg_compression(image: Image.Image, quality: int = 85) -> Image.Image:
     :return: Compressed image
     """
     return JPEGCompressor.get_compress_image(image, quality)
+
+
+if __name__ == '__main__':
+    # Test the WebP compression
+    test_image = Image.open('tests/test.png')
+
+    # Test different quality levels
+    qualities = [25, 50, 75, 100]
+    for q in qualities:
+        compressed = jpeg_compression(test_image, quality=q)
+        compressed.save(f'tests/compressed_q{q}.jpg')
+        print(f"Compression completed for quality {q}")
