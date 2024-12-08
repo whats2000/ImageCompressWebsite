@@ -375,3 +375,59 @@ function downloadImage(imageId) {
             alert("An error occurred while downloading the image.");
         });
 }
+
+// Add event listener for delete buttons
+document.addEventListener('click', (e) => {
+    if (e.target.matches('.delete-btn')) {
+        const imageId = e.target.getAttribute('data-image-id');
+        deleteImage(imageId);
+    }
+});
+
+// Function to delete an image
+function deleteImage(imageId) {
+    fetch(`${backend_api}/api/delete/${imageId}`, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove image preview from UI
+            const preview = document.querySelector(`.image-preview[data-image-id="${imageId}"]`);
+            if (preview) {
+                preview.remove();
+            }
+            alert('Image deleted successfully.');
+        } else {
+            alert('Failed to delete image: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting image:', error);
+        alert('An error occurred while deleting the image.');
+    });
+}
+
+// Function to check processing status of an image
+function checkProcessingStatus(imageId) {
+    fetch(`${backend_api}/api/status/${imageId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update UI based on the processing status
+            console.log(`Image ${imageId} status:`, data.status);
+            // Optionally update the image URLs if processing is complete
+            if (data.status === 'compressed' || data.status === 'watermarked') {
+                const imgElement = document.querySelector(`img[data-image-id="${imageId}"]`);
+                if (imgElement) {
+                    imgElement.src = data.compressed_image_url || data.watermarked_image_url;
+                }
+            }
+        } else {
+            console.error('Failed to get status:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching status:', error);
+    });
+}

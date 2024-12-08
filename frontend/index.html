@@ -67,7 +67,20 @@
 
                 <div class="preview-area" id="previewArea" style="display: none">
                     <h3>Selected Images</h3>
-                    <div class="image-previews" id="imagePreviews"></div>
+                    <div class="image-previews" id="imagePreviews">
+                        <div class="image-preview" data-image-id="<!-- ...existing code... -->">
+                            <!-- ...existing code... -->
+                            <img src="<!-- ...existing code... -->" alt="<!-- ...existing code... -->" data-image-id="<!-- ...existing code... -->">
+                            <!-- Delete button -->
+                            <button class="delete-btn" data-image-id="<!-- ...existing code... -->">
+                                <!-- SVG for delete icon -->
+                                <svg width="16" height="16" viewBox="0 0 24 24">
+                                    <path d="M3 6h18M9 6v12M15 6v12M4 6l1 14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1l1-14"></path>
+                                    <path d="M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Compression Quality Control -->
                     <div class="quality-control">

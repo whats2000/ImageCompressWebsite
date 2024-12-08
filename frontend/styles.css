@@ -287,6 +287,21 @@ input[type="range"] {
     color: #666;
 }
 
+.delete-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.delete-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: red;
+}
+
 /* Dynamic Grid Columns */
 .image-previews.one-image {
     grid-template-columns: 1fr;
