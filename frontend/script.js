@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("file", file);
 
             // Upload file to server
-            fetch(BACKEND_API_URL + "/api/upload", {
+            fetch(`${BACKEND_API_URL}/api/upload`, {
                 method: "POST",
                 body: formData,
             })
@@ -165,12 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Quality Slider
     handleQualitySlider();
-
-    // Handle Download Button Click
-    downloadBtn.addEventListener("click", () => {
-        // Implement download functionality as needed
-        alert("Download functionality to be implemented.");
-    });
 
     // Handle Add Watermark Button Click
     addWatermarkBtn.addEventListener("click", () => {
@@ -238,7 +232,7 @@ function handleQualitySlider() {
  * @param position {string} - The position of the watermark
  */
 function addWatermark(imageId, watermarkText, position) {
-    fetch(BACKEND_API_URL + "/api/watermark", {
+    fetch(`${BACKEND_API_URL}/api/watermark`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -316,7 +310,7 @@ compressBtn.addEventListener("click", () => {
  */
 function compressImages(images, quality) {
     const compressPromises = images.map((image) => {
-        return fetch("/api/compress", {
+        return fetch(`${BACKEND_API_URL}/api/compress`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -379,7 +373,7 @@ function updateImagePreviews() {
         const imageUrl = image.compressedUrl || image.originalUrl;
 
         preview.innerHTML = `
-            <img src="http://localhost:63342/ImageCompressWebsite/backend/uploads/${imageUrl}" alt="${image.fileName}" data-image-id="${image.imageId}">
+            <img src="${UPLOAD_FILE_BASE_URL}/${imageUrl}" alt="${image.fileName}" data-image-id="${image.imageId}">
             <p>${image.fileName}</p>
         `;
         imagePreviews.appendChild(preview);
@@ -405,7 +399,7 @@ downloadBtn.addEventListener("click", () => {
  * @param imageId {string} - The ID of the image to download
  */
 function downloadImage(imageId) {
-    fetch(BACKEND_API_URL + `/api/download?image_id=${encodeURIComponent(imageId)}`)
+    fetch(`${BACKEND_API_URL}/api/download?image_id=${encodeURIComponent(imageId)}`)
         .then((response) => {
             if (response.ok) {
                 return response.blob();
