@@ -26,5 +26,4 @@ export interface WatermarkResponse {
 export interface ProcessedImage {
   imageId: string,
   fileName: string,
-  compression_format: string,
 }

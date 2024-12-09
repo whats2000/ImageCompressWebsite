@@ -106,7 +106,16 @@
                     </div>
                 </div>
 
-                <button class="download-btn" id="downloadBtn" disabled>Download Compressed Images</button>
+                <!-- Download Options and Button -->
+                <div class="download-options">
+                    <label for="downloadType">Download Type:</label>
+                    <select id="downloadType">
+                        <option value="original">Original</option>
+                        <option value="compressed">Compressed</option>
+                        <option value="watermarked">Watermarked</option>
+                    </select>
+                </div>
+                <button class="download-btn" id="downloadBtn" disabled>Download Images</button>
 
                 <!-- Toast Notification Container -->
                 <div id="toastContainer" class="toast-container"></div>

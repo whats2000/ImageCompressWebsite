@@ -2,6 +2,7 @@ const BACKEND_API_URL = "http://127.0.0.1:5000";
 const UPLOAD_FILE_BASE_URL = "http://localhost:63342/ImageCompressWebsite/backend";
 
 let notificationContainer;
+let compressionFormatSelect; // Move declaration here for global scope
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM loaded, initializing functionalities.");
@@ -20,6 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const addWatermarkBtn = document.getElementById("addWatermarkBtn");
     const watermarkText = document.getElementById("watermarkText");
     const watermarkPosition = document.getElementById("watermarkPosition");
+
+    // Compression Format Control
+    compressionFormatSelect = document.getElementById("compressionFormat"); // Ensure it's initialized
 
     // Prevent default drag behaviors
     ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
@@ -131,27 +135,19 @@ document.addEventListener("DOMContentLoaded", () => {
                             window.uploadedImages.push({
                                 imageId: data.image_id,
                                 fileName: file.name,
-                                originalUrl: data.original_image_url,
+                                originalUrl: data.original_image_url, // Keep the original URL
+                                compressedUrl: data.original_image_url // Start with original image
                             });
 
                             // display the image preview
                             const preview = document.createElement("div");
                             preview.className = "image-preview";
-                            // Added compression format selector
-                            const compressionFormatSelector = `<div class="format-selection">
-                                <label>Select Format:</label>
-                                <select class="compression-format">
-                                    <option value="jpeg">JPEG</option>
-                                    <option value="webp">WEBP</option>
-                                </select>
-                            </div>`;
                             preview.innerHTML = `
                                 <img src="${UPLOAD_FILE_BASE_URL}/${data.original_image_url}"
                                      alt="${file.name}"
                                      data-image-id="${data.image_id}"
                                 />
                                 <p>${file.name}</p>
-                                ${compressionFormatSelector}
                             `;
                             imagePreviews.appendChild(preview);
 
@@ -159,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (window.uploadedImages.length === validFiles.length) {
                                 compressBtn.disabled = false;
                                 addWatermarkBtn.disabled = false;
-                                downloadBtn.disabled = true; // Enable after compression
+                                downloadBtn.disabled = false;
                             }
                         } else {
                             showNotification(`Error uploading ${file.name}: ${data.message}`, 'error');
@@ -200,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Compress Button Click
     compressBtn.addEventListener("click", () => {
         const quality = window.compressionQuality || 80; // Default to 80 if not set (1-100)
+        const format = compressionFormatSelect.value; // Get selected format from global selector
         const imagesToCompress = window.uploadedImages;
 
         if (!imagesToCompress || imagesToCompress.length === 0) {
@@ -207,15 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Add compression_format to each image based on user's choice
-        const imagePreviews = document.querySelectorAll('.image-preview');
-        imagePreviews.forEach((preview, index) => {
-            const selectElement = preview.querySelector('.compression-format');
-            const format = selectElement.value;
-            imagesToCompress[index].compression_format = format; // Set user's format
-        });
-
-        compressImages(imagesToCompress, quality);
+        compressImages(imagesToCompress, quality, format);
     });
 });
 
@@ -316,8 +305,9 @@ function addWatermark(imageId, watermarkText, position) {
  * Compress images using the server API
  * @param images {ProcessedImage[]} - List of image objects
  * @param quality {number} - The quality value for compression (1-100)
+ * @param format {string} - The selected compression format
  */
-function compressImages(images, quality) {
+function compressImages(images, quality, format) {
     const compressPromises = images.map((image) => {
         return fetch(`${BACKEND_API_URL}/api/compress`, {
             method: "POST",
@@ -326,7 +316,7 @@ function compressImages(images, quality) {
             },
             body: JSON.stringify({
                 image_id: image.imageId,
-                compression_format: image.compression_format, // 'jpeg' or 'webp'
+                compression_format: format, // Use selected format
                 compression_quality: quality, // 1-100
             }),
         })
@@ -340,6 +330,12 @@ function compressImages(images, quality) {
                     if (data.success) {
                         // Update an image object with compressed image URL
                         image.compressedUrl = data.compressed_image_url;
+
+                        // Update the displayed image
+                        const compressedImage = document.querySelector(`img[data-image-id="${image.imageId}"]`);
+                        if (compressedImage) {
+                            compressedImage.src = `${UPLOAD_FILE_BASE_URL}/${data.compressed_image_url}`; // show compressed image
+                        }
                         return data;
                     } else {
                         showNotification(`Compression failed for ${image.fileName}: ${data.message}`, 'error');
@@ -392,6 +388,7 @@ function updateImagePreviews() {
 let downloadBtn = document.getElementById("downloadBtn");
 downloadBtn.addEventListener("click", () => {
     const imagesToDownload = window.uploadedImages;
+    const format = compressionFormatSelect.value; // Get selected format from global selector
 
     if (!imagesToDownload || imagesToDownload.length === 0) {
         showNotification("No images available for download.", 'warning');
@@ -399,16 +396,16 @@ downloadBtn.addEventListener("click", () => {
     }
 
     imagesToDownload.forEach((image) => {
-        downloadImage(image.imageId);
+        downloadImage(image.imageId, format);
     });
 });
 
 /**
  * Download an image using the server API
  * @param imageId {string} - The ID of the image to download
- * @param type {'original'|'compressed'|'watermarked'} - The type of image to download
+ * @param type {'jpeg'|'webp'} - The type of image to download
  */
-function downloadImage(imageId, type = 'original') {
+function downloadImage(imageId, type) {
     fetch(`${BACKEND_API_URL}/api/download/${encodeURIComponent(imageId)}?type=${type}`)
         .then((response) => {
             if (response.ok) {
@@ -423,7 +420,7 @@ function downloadImage(imageId, type = 'original') {
                 const url = URL.createObjectURL(await blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `image_${imageId}.jpg`; // Adjust extension if necessary
+                a.download = `image_${imageId}.${type}`; // Use the correct file extension
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
