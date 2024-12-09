@@ -397,9 +397,10 @@ downloadBtn.addEventListener("click", () => {
 /**
  * Download an image using the server API
  * @param imageId {string} - The ID of the image to download
+ * @param type {'original'|'compressed'|'watermarked'} - The type of image to download
  */
-function downloadImage(imageId) {
-    fetch(`${BACKEND_API_URL}/api/download?image_id=${encodeURIComponent(imageId)}`)
+function downloadImage(imageId, type = 'original') {
+    fetch(`${BACKEND_API_URL}/api/download/${encodeURIComponent(imageId)}?type=${type}`)
         .then((response) => {
             if (response.ok) {
                 return response.blob();
