@@ -14,9 +14,8 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     margin: 0;
-    padding: 0;
     background-color: var(--secondary-color);
-    padding-bottom: 100px; /* Space for footer */
+    padding: 0 0 100px;
 }
 
 header {
