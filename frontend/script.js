@@ -3,6 +3,7 @@ const UPLOAD_FILE_BASE_URL = "http://localhost:63342/ImageCompressWebsite/backen
 
 let notificationContainer;
 let compressionFormatSelect;
+let downloadBtn = document.getElementById("downloadBtn");
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM loaded, initializing functionalities.");
@@ -209,7 +210,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-let downloadBtn = document.getElementById("downloadBtn");
+// Add event listener for delete buttons
+document.addEventListener('click', (e) => {
+  if (e.target.matches('.delete-btn')) {
+    const imageId = e.target.getAttribute('data-image-id');
+    deleteImage(imageId);
+  }
+});
+
 downloadBtn.addEventListener("click", () => {
   const imagesToDownload = window.uploadedImages;
   const format = compressionFormatSelect.value; // Get a selected format from global selector
@@ -222,14 +230,6 @@ downloadBtn.addEventListener("click", () => {
   imagesToDownload.forEach((image) => {
     downloadImage(image.imageId, format);
   });
-});
-
-// Add event listener for delete buttons
-document.addEventListener('click', (e) => {
-  if (e.target.matches('.delete-btn')) {
-    const imageId = e.target.getAttribute('data-image-id');
-    deleteImage(imageId);
-  }
 });
 
 // Initialize Notifications
