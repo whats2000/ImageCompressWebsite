@@ -1,4 +1,5 @@
-const backend_api = "http://127.0.0.1:5000";
+const BACKEND_API_URL = "http://127.0.0.1:5000";
+const UPLOAD_FILE_BASE_URL = "http://localhost:63342/ImageCompressWebsite/backend";
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM loaded, initializing functionalities.");
@@ -109,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("file", file);
 
             // Upload file to server
-            fetch(backend_api + "/api/upload", {
+            fetch(BACKEND_API_URL + "/api/upload", {
                 method: "POST",
                 body: formData,
             })
@@ -132,9 +133,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             const preview = document.createElement("div");
                             preview.className = "image-preview";
                             preview.innerHTML = `
-                    <img src="${data.original_image_url}" alt="${file.name}" data-image-id="${data.image_id}">
-                    <p>${file.name}</p>
-                `;
+                                <img src="${UPLOAD_FILE_BASE_URL}/${data.original_image_url}" 
+                                     alt="${file.name}" 
+                                     data-image-id="${data.image_id}"
+                                />
+                                <p>${file.name}</p>
+                            `;
                             imagePreviews.appendChild(preview);
 
                             // Enable buttons when all images are uploaded
@@ -234,7 +238,7 @@ function handleQualitySlider() {
  * @param position {string} - The position of the watermark
  */
 function addWatermark(imageId, watermarkText, position) {
-    fetch(backend_api + "/api/watermark", {
+    fetch(BACKEND_API_URL + "/api/watermark", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -251,23 +255,23 @@ function addWatermark(imageId, watermarkText, position) {
              * @param {WatermarkResponse} data - Response from the server
              */
             (data) => {
-            if (data.success) {
-                // Update the image in window.uploadedImages
-                const image = window.uploadedImages.find((img) => img.imageId === imageId);
-                if (image) {
-                    image.compressedUrl = data.watermarked_image_url;
+                if (data.success) {
+                    // Update the image in window.uploadedImages
+                    const image = window.uploadedImages.find((img) => img.imageId === imageId);
+                    if (image) {
+                        image.compressedUrl = data.watermarked_image_url;
 
-                    // Update the image preview
-                    const watermarkedImage = document.querySelector(`img[data-image-id="${imageId}"]`);
-                    if (watermarkedImage) {
-                        watermarkedImage.src = data.watermarked_image_url;
+                        // Update the image preview
+                        const watermarkedImage = document.querySelector(`img[data-image-id="${imageId}"]`);
+                        if (watermarkedImage) {
+                            watermarkedImage.src = data.watermarked_image_url;
+                        }
                     }
+                    alert(data.message);
+                } else {
+                    alert("Failed to add watermark: " + data.message);
                 }
-                alert(data.message);
-            } else {
-                alert("Failed to add watermark: " + data.message);
-            }
-        })
+            })
         .catch((error) => {
             console.error("Error adding watermark:", error);
             alert("An error occurred while adding the watermark.");
@@ -330,15 +334,15 @@ function compressImages(images, quality) {
                  * @returns {{success}|any|null}
                  */
                 (data) => {
-                if (data.success) {
-                    // Update an image object with compressed image URL
-                    image.compressedUrl = data.compressed_image_url;
-                    return data;
-                } else {
-                    alert(`Compression failed for ${image.fileName}: ${data.message}`);
-                    return null;
-                }
-            })
+                    if (data.success) {
+                        // Update an image object with compressed image URL
+                        image.compressedUrl = data.compressed_image_url;
+                        return data;
+                    } else {
+                        alert(`Compression failed for ${image.fileName}: ${data.message}`);
+                        return null;
+                    }
+                })
             .catch((error) => {
                 console.error("Error compressing image:", error);
                 alert(`An error occurred while compressing ${image.fileName}.`);
@@ -375,7 +379,7 @@ function updateImagePreviews() {
         const imageUrl = image.compressedUrl || image.originalUrl;
 
         preview.innerHTML = `
-            <img src="${imageUrl}" alt="${image.fileName}" data-image-id="${image.imageId}">
+            <img src="http://localhost:63342/ImageCompressWebsite/backend/uploads/${imageUrl}" alt="${image.fileName}" data-image-id="${image.imageId}">
             <p>${image.fileName}</p>
         `;
         imagePreviews.appendChild(preview);
@@ -401,7 +405,7 @@ downloadBtn.addEventListener("click", () => {
  * @param imageId {string} - The ID of the image to download
  */
 function downloadImage(imageId) {
-    fetch(backend_api + `/api/download?image_id=${encodeURIComponent(imageId)}`)
+    fetch(BACKEND_API_URL + `/api/download?image_id=${encodeURIComponent(imageId)}`)
         .then((response) => {
             if (response.ok) {
                 return response.blob();
@@ -441,7 +445,7 @@ document.addEventListener('click', (e) => {
  * @param imageId {string} - The ID of the image to delete
  */
 function deleteImage(imageId) {
-    fetch(`${backend_api}/api/delete/${encodeURIComponent(imageId)}`, {
+    fetch(`${BACKEND_API_URL}/api/delete/${encodeURIComponent(imageId)}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
