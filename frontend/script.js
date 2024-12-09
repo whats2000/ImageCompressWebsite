@@ -1,8 +1,13 @@
 const BACKEND_API_URL = "http://127.0.0.1:5000";
 const UPLOAD_FILE_BASE_URL = "http://localhost:63342/ImageCompressWebsite/backend";
 
+let notificationContainer;
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM loaded, initializing functionalities.");
+
+    // Initialize Notifications
+    initializeNotifications();
 
     // Initialize Drag & Drop
     const dropZone = document.getElementById("dropZone");
@@ -71,11 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
         imagePreviews.innerHTML = "";
 
         const validFiles = Array.from(files).filter((file) => {
-            const isValidType = file.type === "image/jpeg" || file.type === "image/webp";
-            if (!isValidType) {
-                alert(`Unsupported file type: ${file.name}. Please upload JPEG or WebP images.`);
+            if (!file.type.startsWith('image/')) {
+                showNotification(`Unsupported file type: ${file.name}. Please upload an image file.`, 'error');
+                return false;
             }
-            return isValidType;
+            return true;
         });
 
         if (validFiles.length === 0) {
@@ -129,15 +134,24 @@ document.addEventListener("DOMContentLoaded", () => {
                                 originalUrl: data.original_image_url,
                             });
 
-                            // Display the image preview
+                            // display the image preview
                             const preview = document.createElement("div");
                             preview.className = "image-preview";
+                            // Added compression format selector
+                            const compressionFormatSelector = `<div class="format-selection">
+                                <label>Select Format:</label>
+                                <select class="compression-format">
+                                    <option value="jpeg">JPEG</option>
+                                    <option value="webp">WEBP</option>
+                                </select>
+                            </div>`;
                             preview.innerHTML = `
-                                <img src="${UPLOAD_FILE_BASE_URL}/${data.original_image_url}" 
-                                     alt="${file.name}" 
+                                <img src="${UPLOAD_FILE_BASE_URL}/${data.original_image_url}"
+                                     alt="${file.name}"
                                      data-image-id="${data.image_id}"
                                 />
                                 <p>${file.name}</p>
+                                ${compressionFormatSelector}
                             `;
                             imagePreviews.appendChild(preview);
 
@@ -148,17 +162,17 @@ document.addEventListener("DOMContentLoaded", () => {
                                 downloadBtn.disabled = true; // Enable after compression
                             }
                         } else {
-                            alert(`Error uploading ${file.name}: ${data.message}`);
+                            showNotification(`Error uploading ${file.name}: ${data.message}`, 'error');
                         }
                     })
                 .catch((error) => {
                     console.error("Error uploading image:", error);
-                    alert(`An error occurred while uploading ${file.name}.`);
+                    showNotification(`An error occurred while uploading ${file.name}.`, 'error');
                 });
         });
 
         // Enable Download Button
-        downloadBtn.disabled = false;
+        downloadBtn.disabled = true;
         // Enable Add Watermark Button
         addWatermarkBtn.disabled = false;
     }
@@ -170,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addWatermarkBtn.addEventListener("click", () => {
         const selectedImages = imagePreviews.querySelectorAll(".image-preview img");
         if (selectedImages.length === 0) {
-            alert("No images selected for watermark.");
+            showNotification("No images selected for watermark.", 'warning');
             return;
         }
 
@@ -182,22 +196,48 @@ document.addEventListener("DOMContentLoaded", () => {
             addWatermark(imageId, text, position);
         });
     });
+
+    // Compress Button Click
+    compressBtn.addEventListener("click", () => {
+        const quality = window.compressionQuality || 80; // Default to 80 if not set (1-100)
+        const imagesToCompress = window.uploadedImages;
+
+        if (!imagesToCompress || imagesToCompress.length === 0) {
+            showNotification("No images available for compression.", 'warning');
+            return;
+        }
+
+        // Add compression_format to each image based on user's choice
+        const imagePreviews = document.querySelectorAll('.image-preview');
+        imagePreviews.forEach((preview, index) => {
+            const selectElement = preview.querySelector('.compression-format');
+            const format = selectElement.value;
+            imagesToCompress[index].compression_format = format; // Set user's format
+        });
+
+        compressImages(imagesToCompress, quality);
+    });
 });
 
-// Footer
-window.addEventListener("scroll", () => {
-    const footer = document.getElementById("footer");
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-    const scrollPosition = window.scrollY;
+// Initialize Notifications
+function initializeNotifications() {
+    notificationContainer = document.createElement('div');
+    notificationContainer.className = 'notification-container';
+    document.body.appendChild(notificationContainer);
+}
 
-    // Show footer when near bottom (within 100px)
-    if (windowHeight + scrollPosition >= documentHeight - 100) {
-        footer.classList.add("visible");
-    } else {
-        footer.classList.remove("visible");
-    }
-});
+// Show Notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerText = message;
+
+    notificationContainer.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
 
 /**
  * Handle the quality slider for image compression
@@ -261,47 +301,16 @@ function addWatermark(imageId, watermarkText, position) {
                             watermarkedImage.src = data.watermarked_image_url;
                         }
                     }
-                    alert(data.message);
+                    showNotification(data.message, 'success');
                 } else {
-                    alert("Failed to add watermark: " + data.message);
+                    showNotification("Failed to add watermark: " + data.message, 'error');
                 }
             })
         .catch((error) => {
             console.error("Error adding watermark:", error);
-            alert("An error occurred while adding the watermark.");
+            showNotification("An error occurred while adding the watermark.", 'error');
         });
 }
-
-/**
- * Get the compression format based on the file extension
- * @param fileName {string} - The name of the file
- * @returns {string|string} - The compression format ('jpeg' or 'webp')
- */
-function getCompressionFormat(fileName) {
-    const extension = fileName.split(".").pop().toLowerCase();
-    return extension === "jpg" ? "jpeg" : extension; // Converts 'jpg' to 'jpeg'
-}
-
-// Compress Button Reference
-const compressBtn = document.getElementById("compressBtn");
-
-// Handle Compress Button Click
-compressBtn.addEventListener("click", () => {
-    const quality = window.compressionQuality || 80; // Default to 80 if not set (1-100)
-    const imagesToCompress = window.uploadedImages;
-
-    if (!imagesToCompress || imagesToCompress.length === 0) {
-        alert("No images available for compression.");
-        return;
-    }
-
-    // Add compression_format to each image
-    imagesToCompress.forEach((image) => {
-        image.compression_format = getCompressionFormat(image.fileName);
-    });
-
-    compressImages(imagesToCompress, quality);
-});
 
 /**
  * Compress images using the server API
@@ -333,13 +342,13 @@ function compressImages(images, quality) {
                         image.compressedUrl = data.compressed_image_url;
                         return data;
                     } else {
-                        alert(`Compression failed for ${image.fileName}: ${data.message}`);
+                        showNotification(`Compression failed for ${image.fileName}: ${data.message}`, 'error');
                         return null;
                     }
                 })
             .catch((error) => {
                 console.error("Error compressing image:", error);
-                alert(`An error occurred while compressing ${image.fileName}.`);
+                showNotification(`An error occurred while compressing ${image.fileName}.`, 'error');
                 return null;
             });
     });
@@ -349,10 +358,10 @@ function compressImages(images, quality) {
         const allCompressed = results.every((result) => result && result.success);
 
         if (allCompressed) {
-            alert("All images compressed successfully.");
+            showNotification("All images compressed successfully.", 'success');
             downloadBtn.disabled = false;
         } else {
-            alert("Some images failed to compress.");
+            showNotification("Some images failed to compress.", 'error');
         }
 
         // Update image previews with compressed images
@@ -385,7 +394,7 @@ downloadBtn.addEventListener("click", () => {
     const imagesToDownload = window.uploadedImages;
 
     if (!imagesToDownload || imagesToDownload.length === 0) {
-        alert("No images available for download.");
+        showNotification("No images available for download.", 'warning');
         return;
     }
 
@@ -405,7 +414,7 @@ function downloadImage(imageId, type = 'original') {
             if (response.ok) {
                 return response.blob();
             } else {
-                alert("Failed to download image.");
+                showNotification("Failed to download image.", 'error');
                 return null;
             }
         })
@@ -423,7 +432,7 @@ function downloadImage(imageId, type = 'original') {
         })
         .catch((error) => {
             console.error("Error downloading image:", error);
-            alert("An error occurred while downloading the image.");
+            showNotification("An error occurred while downloading the image.", 'error');
         });
 }
 
@@ -451,38 +460,13 @@ function deleteImage(imageId) {
                 if (previewElement) {
                     previewElement.remove();
                 }
-                alert(data.message);
+                showNotification(data.message, 'success');
             } else {
-                alert(`Failed to delete image: ${data.message}`);
+                showNotification(`Failed to delete image: ${data.message}`, 'error');
             }
         })
         .catch(error => {
             console.error('Error deleting image:', error);
-            alert('An error occurred while deleting the image.');
+            showNotification('An error occurred while deleting the image.', 'error');
         });
 }
-
-
-// Function to check processing status of an image
-// function checkProcessingStatus(imageId) {
-//     fetch(`${backend_api}/api/status/${imageId}`)
-//     .then(response => response.json())
-//     .then(data => {
-//         if (data.success) {
-//             // Update UI based on the processing status
-//             console.log(`Image ${imageId} status:`, data.status);
-//             // Optionally update the image URLs if processing is complete
-//             if (data.status === 'compressed' || data.status === 'watermarked') {
-//                 const imgElement = document.querySelector(`img[data-image-id="${imageId}"]`);
-//                 if (imgElement) {
-//                     imgElement.src = data.compressed_image_url || data.watermarked_image_url;
-//                 }
-//             }
-//         } else {
-//             console.error('Failed to get status:', data.message);
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Error fetching status:', error);
-//     });
-// }
