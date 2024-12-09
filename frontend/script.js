@@ -311,7 +311,7 @@ function addWatermark(imageId, watermarkText, position) {
             // Update the image preview
             const watermarkedImage = document.querySelector(`img[data-image-id="${imageId}"]`);
             if (watermarkedImage) {
-              watermarkedImage.src = data.watermarked_image_url;
+              watermarkedImage.src = `${UPLOAD_FILE_BASE_URL}/${data.watermarked_image_url}`;
             }
           }
           showNotification(data.message, 'success');
