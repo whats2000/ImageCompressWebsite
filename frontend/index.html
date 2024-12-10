@@ -6,6 +6,7 @@
         <title>Image Compress</title>
         <link rel="stylesheet" href="styles.css" />
         <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
     </head>
     <body>
         <header>
@@ -109,14 +110,27 @@
                 <!-- Download Options and Button -->
                 <div class="download-options">
                     <label for="downloadType">Download Type:</label>
-                    <select id="downloadType">
-                        <option value="original">Original</option>
-                        <option value="compressed">Compressed</option>
-                        <option value="watermarked">Watermarked</option>
-                    </select>
+                    <div class="select-menu" id="downloadType">
+                        <div class="select-btn">
+                            <span class="sBtn-text">Select Download Type</span>
+                            <i class="bx bx-chevron-down"></i>
+                        </div>
+                        <ul class="options">
+                            <li class="option" data-value="compressed">
+                                <span class="option-text">Compressed</span>
+                            </li>
+                            <li class="option" data-value="original">
+                                <span class="option-text">Original</span>
+                            </li>
+                            <li class="option" data-value="watermarked">
+                                <span class="option-text">Watermarked</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Download Button -->
+                    <button class ="download-btn" id="downloadBtn" disabled>Download Images</button>
                 </div>
-                <button class="download-btn" id="downloadBtn" disabled>Download Images</button>
-
+ 
                 <!-- Toast Notification Container -->
                 <div id="toastContainer" class="toast-container"></div>
             </section>

@@ -426,3 +426,89 @@ input[type="range"] {
 .notification.info {
     border-left: 5px solid #3498db;
 }
+
+
+/* Select Menu Container */
+
+.download-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem; /* Add space between elements */
+}
+
+.select-menu {
+    align-items: center;
+    position: relative;
+    width: 30%;
+    /* You can adjust the width as needed */
+}
+
+.select-menu .select-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 45px;
+    padding: 0 16px;
+    background: #fff;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.select-menu .select-btn .sBtn-text {
+    font-size: 16px;
+    color: #333;
+}
+
+.select-menu .select-btn i {
+    font-size: 20px;
+    transition: transform 0.3s;
+}
+
+.select-menu.active .select-btn i {
+    transform: rotate(-180deg);
+}
+
+.select-menu .options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    padding: 0;
+    margin-top: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 10;
+}
+
+.select-menu.active .options {
+    display: block;
+}
+
+.select-menu .option {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.select-menu .option:hover {
+    background: #f2f2f2;
+}
+
+.select-menu .option .option-text {
+    font-size: 16px;
+    color: #333;
+}
+
+.select-menu .option i {
+    margin-right: 8px;
+    font-size: 20px;
+    /* Hide icons if not used */
+    display: none;
+}
