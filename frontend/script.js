@@ -468,3 +468,18 @@ function deleteImage(imageId) {
       showNotification('An error occurred while deleting the image.', 'error');
     });
 }
+
+// Footer display 
+window.addEventListener('scroll', () => {
+    const footer = document.getElementById('footer');
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const scrollPosition = window.scrollY;
+    
+    // Show footer when near bottom (within 100px)
+    if (windowHeight + scrollPosition >= documentHeight - 100) {
+        footer.classList.add('visible');
+    } else {
+        footer.classList.remove('visible');
+    }
+});

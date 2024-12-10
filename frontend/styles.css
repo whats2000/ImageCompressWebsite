@@ -15,7 +15,7 @@ body {
     color: var(--text-color);
     margin: 0;
     background-color: var(--secondary-color);
-    padding: 0 0 100px;
+    padding: 0 0 200px;
 }
 
 header {
@@ -326,7 +326,7 @@ input[type="range"] {
     width: 100%;
     background-color: var(--primary-color);
     color: white;
-    padding: 1.5rem 0; /* Increased padding */
+    padding: 1rem 0; 
     transition: bottom 0.3s ease;
     z-index: 1000;
     margin-top: 2rem;
@@ -340,7 +340,7 @@ input[type="range"] {
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 0rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
