@@ -62,7 +62,7 @@ export const MainContent: React.FC = () => {
       notify.warn('No images to compress');
       return;
     }
-
+    let haveErrors = false;
     try {
       const compressPromises = images.map(async (image) => {
         const response = await axios.post(`${BACKEND_API_URL}/api/compress`, {
@@ -79,7 +79,10 @@ export const MainContent: React.FC = () => {
             compressedUrl: data.compressed_image_url,
           };
         } else {
-          notify.error(`Compression failed for ${image.fileName}`);
+          notify.error(
+            `Compression failed for ${image.fileName} with error: ${data.message}`,
+          );
+          haveErrors = true;
           return image;
         }
       });
@@ -87,7 +90,10 @@ export const MainContent: React.FC = () => {
       const compressedImages = await Promise.all(compressPromises);
 
       setImages(compressedImages);
-      notify.success('Images compressed successfully');
+
+      if (!haveErrors) {
+        notify.success('Images compressed successfully');
+      }
     } catch (error) {
       notify.error('Error compressing images');
       console.error(error);

@@ -69,7 +69,7 @@ export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
 
       <FunctionButton
         onClick={handleAddWatermark}
-        disabled={images.length === 0}
+        disabled={images.length === 0 || !watermarkText}
       >
         Add Watermark
       </FunctionButton>
