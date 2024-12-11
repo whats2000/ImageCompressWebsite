@@ -1,5 +1,5 @@
 const BACKEND_API_URL = "http://127.0.0.1:5000";
-const UPLOAD_FILE_BASE_URL = "http://localhost:63342/ImageCompressWebsite/backend";
+const UPLOAD_FILE_BASE_URL = `${window.location.origin}/backend`;
 
 let notificationContainer;
 let compressionFormatSelect;
