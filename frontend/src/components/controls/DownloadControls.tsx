@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import { ProcessedImage } from '../../types';
 import { BACKEND_API_URL } from '../../styles/GlobalStyles';
-import { Dropdown, Flex, Select, Space, Typography } from 'antd';
+import { Dropdown, Flex, Select, Typography } from 'antd';
 
 interface DownloadControlsProps {
   images: ProcessedImage[];
@@ -80,22 +80,20 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
   };
 
   return (
-    <Flex align={'center'} justify={'center'} gap={10}>
-      <Space>
-        <Space>
-          <Typography.Text>Compression Format:</Typography.Text>
-          <Select
-            id='compressionFormat'
-            value={compressionFormat}
-            options={[
-              { value: 'webp', label: 'WebP' },
-              { value: 'jpeg', label: 'JPEG' },
-            ]}
-            onSelect={setCompressionFormat}
-            disabled={selectedDownloadType !== 'compressed'}
-          />
-        </Space>
+    <Flex align={'center'} justify={'center'} gap={10} wrap={'wrap'}>
+      <Typography.Text>Compression Format:</Typography.Text>
+      <Select
+        id='compressionFormat'
+        value={compressionFormat}
+        options={[
+          { value: 'webp', label: 'WebP' },
+          { value: 'jpeg', label: 'JPEG' },
+        ]}
+        onSelect={setCompressionFormat}
+        disabled={selectedDownloadType !== 'compressed'}
+      />
 
+      <div>
         <Dropdown.Button
           menu={{
             items: [
@@ -121,7 +119,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
         >
           Download {selectedDownloadType} Images
         </Dropdown.Button>
-      </Space>
+      </div>
     </Flex>
   );
 };

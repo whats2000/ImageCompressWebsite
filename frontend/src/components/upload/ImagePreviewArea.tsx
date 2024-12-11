@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
+
 import { ProcessedImage } from '../../types';
-import { UPLOAD_FILE_BASE_URL } from '../../styles/GlobalStyles';
+import { BACKEND_API_URL } from '../../styles/GlobalStyles.ts';
 
 const PreviewArea = styled.div`
   width: 45%;
@@ -16,12 +18,16 @@ const PreviewArea = styled.div`
 const ImagePreviews = styled.div<{ $imageCount: number }>`
   display: grid;
   gap: 1rem;
-  grid-template-columns: ${props => {
-    switch(props.$imageCount) {
-      case 1: return '1fr';
-      case 2: return '1fr 1fr';
-      case 3: return 'repeat(3, 1fr)';
-      default: return 'repeat(auto-fill, minmax(200px, 1fr))';
+  grid-template-columns: ${(props) => {
+    switch (props.$imageCount) {
+      case 1:
+        return '1fr';
+      case 2:
+        return '1fr 1fr';
+      case 3:
+        return 'repeat(3, 1fr)';
+      default:
+        return 'repeat(auto-fill, minmax(200px, 1fr))';
     }
   }};
 `;
@@ -62,26 +68,54 @@ interface ImagePreviewAreaProps {
   onDeleteImage: (imageId: string) => void;
 }
 
-export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({ 
-  images, 
-  onDeleteImage 
+export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({
+  images,
+  onDeleteImage,
 }) => {
+  const [imageSrcs, setImageSrcs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const updatedSrcs: Record<string, string> = {};
+      for (const image of images) {
+        try {
+          const response = await axios.get(
+            `${BACKEND_API_URL}/api/image/${image.imageId}`,
+          );
+          if (response.data.success) {
+            updatedSrcs[image.imageId] =
+              `data:image/png;base64,${response.data.image_base64}`;
+          }
+        } catch (error) {
+          console.error('Unable to retrieve image:', error);
+        }
+      }
+      setImageSrcs(updatedSrcs);
+    };
+
+    fetchImages();
+  }, [images]);
+
   if (images.length === 0) return null;
 
   return (
     <PreviewArea>
       <h3>Selected Images</h3>
       <ImagePreviews $imageCount={images.length}>
-        {images.map(image => (
+        {images.map((image) => (
           <ImagePreview key={image.imageId}>
-            <PreviewImage 
-              src={`${UPLOAD_FILE_BASE_URL}/${image.compressedUrl || image.originalUrl}`} 
-              alt={image.fileName} 
-            />
+            {imageSrcs[image.imageId] ? (
+              <PreviewImage
+                src={imageSrcs[image.imageId]}
+                alt={image.fileName}
+              />
+            ) : (
+              <p>Loading...</p>
+            )}
             <p>{image.fileName}</p>
             <DeleteButton onClick={() => onDeleteImage(image.imageId)}>
-              <svg viewBox="0 0 24 24">
-                <path d="M3 6h18M9 6v12M15 6v12M4 6l1 14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1l1-14M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"></path>
+              <svg viewBox='0 0 24 24'>
+                <path d='M3 6h18M9 6v12M15 6v12M4 6l1 14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1l1-14M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2'></path>
               </svg>
             </DeleteButton>
           </ImagePreview>

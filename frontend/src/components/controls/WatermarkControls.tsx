@@ -40,8 +40,8 @@ export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   };
 
   return (
-    <Flex align={'center'} gap={10} justify={'center'}>
-      <Space>
+    <Flex align={'center'} gap={10} justify={'center'} wrap={'wrap'}>
+      <Space wrap={true}>
         <Typography.Text>Watermark Text:</Typography.Text>
         <Input
           type='text'
@@ -51,7 +51,7 @@ export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
           placeholder='Enter watermark text'
         />
       </Space>
-      <Space>
+      <Space wrap={true}>
         <Typography.Text>Position:</Typography.Text>
         <Select
           options={[

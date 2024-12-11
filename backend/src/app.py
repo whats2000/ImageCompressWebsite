@@ -5,6 +5,7 @@ from api.upload import upload_bp
 from api.compress import compress_bp
 from api.watermark import watermark_bp
 from api.status import status_bp
+from api.image import image_bp
 from api.download import download_bp
 from api.delete import delete_bp
 
@@ -17,6 +18,7 @@ def create_app():
     api_app.register_blueprint(compress_bp, url_prefix='/api')
     api_app.register_blueprint(watermark_bp, url_prefix='/api')
     api_app.register_blueprint(status_bp, url_prefix='/api')
+    api_app.register_blueprint(image_bp, url_prefix='/api')
     api_app.register_blueprint(download_bp, url_prefix='/api')
     api_app.register_blueprint(delete_bp, url_prefix='/api')
 

@@ -37,8 +37,8 @@ export const CompressionControls: React.FC<CompressionControlsProps> = ({
   onCompress,
 }) => {
   return (
-    <Flex justify={'center'} gap={10}>
-      <Space>
+    <Flex justify={'center'} gap={10} wrap={'wrap'}>
+      <Space wrap={true}>
         <label htmlFor='qualitySlider'>Compression Quality:</label>
         <Slider
           id='qualitySlider'
@@ -51,7 +51,7 @@ export const CompressionControls: React.FC<CompressionControlsProps> = ({
         <span>{Math.round(compressionQuality * 100)}%</span>
       </Space>
 
-      <Space>
+      <Space wrap={true}>
         <Typography.Text>Compression Format:</Typography.Text>
         <Select
           id='compressionFormat'

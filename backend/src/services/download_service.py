@@ -1,4 +1,5 @@
 import os
+import base64
 
 def get_downloadable_image(image_id: str, image_type: str='original') -> dict:
     """
@@ -55,3 +56,29 @@ def get_downloadable_image(image_id: str, image_type: str='original') -> dict:
         'success': False,
         'message': f'{image_type.capitalize()} image not found'
     }
+
+
+def get_image_base64(image_id: str, image_type: str='original') -> dict:
+    """
+    Convert image to base64 string for transmission
+    :param image_id: Unique identifier for the image
+    :param image_type: Type of image
+    :return: Dictionary with base64 encoded image data
+    """
+    result = get_downloadable_image(image_id, image_type)
+    if not result['success']:
+        return result
+
+    filepath = result['filepath']
+    try:
+        with open(filepath, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        return {
+            'success': True,
+            'image_base64': encoded_string
+        }
+    except Exception as e:
+        return {
+            'success': False,
+            'message': str(e)
+        }
