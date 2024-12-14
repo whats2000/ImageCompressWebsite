@@ -30,6 +30,9 @@ export const MainContent: React.FC = () => {
   const [compressionFormat, setCompressionFormat] = useState<'jpeg' | 'webp'>(
     'webp',
   );
+  const [lastOperation, setLastOperation] = useState<
+    'compressWithWebp' | 'compressWithJpeg' | 'watermark' | null
+  >(null);
 
   // Use the custom notification hook
   const notify = useNotification();
@@ -74,6 +77,12 @@ export const MainContent: React.FC = () => {
         const data = response.data;
 
         if (data.success) {
+          setLastOperation(
+            compressionFormat === 'webp'
+              ? 'compressWithWebp'
+              : 'compressWithJpeg',
+          );
+
           return {
             ...image,
             compressedUrl: data.compressed_image_url,
@@ -125,6 +134,8 @@ export const MainContent: React.FC = () => {
         const data = response.data;
 
         if (data.success) {
+          setLastOperation('watermark');
+
           return {
             ...image,
             watermarkedUrl: data.watermarked_image_url,
@@ -170,7 +181,7 @@ export const MainContent: React.FC = () => {
                 onFormatChange={setCompressionFormat}
                 onCompress={handleCompressImages}
               />
-              <DownloadControls images={images} />
+              <DownloadControls images={images} lastOperation={lastOperation} />
             </Space>
           </Card>
         </>

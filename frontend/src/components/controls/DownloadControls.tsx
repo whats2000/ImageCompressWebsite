@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
@@ -8,17 +8,33 @@ import { Dropdown, Flex, Select, Typography } from 'antd';
 
 interface DownloadControlsProps {
   images: ProcessedImage[];
+  lastOperation: 'compressWithWebp' | 'compressWithJpeg' | 'watermark' | null;
 }
 
 export const DownloadControls: React.FC<DownloadControlsProps> = ({
   images,
+  lastOperation,
 }) => {
   const [selectedDownloadType, setSelectedDownloadType] = useState<
     'compressed' | 'original' | 'watermarked'
-  >('compressed');
+  >('original');
   const [compressionFormat, setCompressionFormat] = useState<'webp' | 'jpeg'>(
     'webp',
   );
+
+  useEffect(() => {
+    if (lastOperation === 'watermark') {
+      setSelectedDownloadType('watermarked');
+    } else if (lastOperation === 'compressWithJpeg') {
+      setSelectedDownloadType('compressed');
+      setCompressionFormat('jpeg');
+    } else if (lastOperation === 'compressWithWebp') {
+      setSelectedDownloadType('compressed');
+      setCompressionFormat('webp');
+    } else {
+      setSelectedDownloadType('original');
+    }
+  }, [lastOperation]);
 
   const handleDownload = async () => {
     if (images.length === 0) {
