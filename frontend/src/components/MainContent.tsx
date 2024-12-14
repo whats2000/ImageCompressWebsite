@@ -30,6 +30,8 @@ export const MainContent: React.FC = () => {
   const [compressionFormat, setCompressionFormat] = useState<'jpeg' | 'webp'>(
     'webp',
   );
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [isWatermarking, setIsWatermarking] = useState(false);
   const [lastOperation, setLastOperation] = useState<
     'compressWithWebp' | 'compressWithJpeg' | 'watermark' | null
   >(null);
@@ -65,6 +67,7 @@ export const MainContent: React.FC = () => {
       notify.warn('No images to compress');
       return;
     }
+    setIsCompressing(true);
     let haveErrors = false;
     try {
       const compressPromises = images.map(async (image) => {
@@ -106,6 +109,8 @@ export const MainContent: React.FC = () => {
     } catch (error) {
       notify.error('Error compressing images');
       console.error(error);
+    } finally {
+      setIsCompressing(false);
     }
   };
 
@@ -117,6 +122,7 @@ export const MainContent: React.FC = () => {
       notify.warn('No images to watermark');
       return;
     }
+    setIsWatermarking(true);
 
     if (!watermarkText) {
       notify.warn('Please enter watermark text');
@@ -153,6 +159,8 @@ export const MainContent: React.FC = () => {
     } catch (error) {
       notify.error('Error adding watermarks');
       console.error(error);
+    } finally {
+      setIsWatermarking(false);
     }
   };
 
@@ -172,6 +180,7 @@ export const MainContent: React.FC = () => {
               <WatermarkControls
                 images={images}
                 onAddWatermark={handleAddWatermark}
+                isWatermarking={isWatermarking}
               />
               <CompressionControls
                 images={images}
@@ -180,6 +189,7 @@ export const MainContent: React.FC = () => {
                 onQualityChange={setCompressionQuality}
                 onFormatChange={setCompressionFormat}
                 onCompress={handleCompressImages}
+                isCompressing={isCompressing}
               />
               <DownloadControls images={images} lastOperation={lastOperation} />
             </Space>

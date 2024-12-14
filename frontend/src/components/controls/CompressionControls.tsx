@@ -1,23 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
 
 import { ProcessedImage } from '../../types';
-import { Flex, Select, Slider, Space, Typography } from 'antd';
-
-const FunctionButton = styled.button`
-  background-color: var(--primary-color);
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-`;
+import { Button, Flex, Select, Slider, Space, Typography } from 'antd';
 
 interface CompressionControlsProps {
   images: ProcessedImage[];
@@ -26,6 +10,7 @@ interface CompressionControlsProps {
   onQualityChange: (quality: number) => void;
   onFormatChange: (format: 'jpeg' | 'webp') => void;
   onCompress: () => void;
+  isCompressing: boolean;
 }
 
 export const CompressionControls: React.FC<CompressionControlsProps> = ({
@@ -35,6 +20,7 @@ export const CompressionControls: React.FC<CompressionControlsProps> = ({
   onQualityChange,
   onFormatChange,
   onCompress,
+  isCompressing,
 }) => {
   return (
     <Flex justify={'center'} gap={10} wrap={'wrap'}>
@@ -64,9 +50,14 @@ export const CompressionControls: React.FC<CompressionControlsProps> = ({
         />
       </Space>
 
-      <FunctionButton onClick={onCompress} disabled={images.length === 0}>
+      <Button
+        type={'primary'}
+        onClick={onCompress}
+        disabled={images.length === 0 || isCompressing}
+        loading={isCompressing}
+      >
         Compress Images
-      </FunctionButton>
+      </Button>
     </Flex>
   );
 };

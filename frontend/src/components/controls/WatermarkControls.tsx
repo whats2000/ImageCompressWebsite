@@ -1,32 +1,18 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 
 import { ProcessedImage } from '../../types';
-import { Flex, Input, Select, Space, Typography } from 'antd';
-
-const FunctionButton = styled.button`
-  background-color: var(--primary-color);
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-`;
+import { Button, Flex, Input, Select, Space, Typography } from 'antd';
 
 interface WatermarkControlsProps {
   images: ProcessedImage[];
   onAddWatermark: (text: string, position: string) => void;
+  isWatermarking: boolean;
 }
 
 export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   images,
   onAddWatermark,
+  isWatermarking,
 }) => {
   const [watermarkText, setWatermarkText] = useState('');
   const [watermarkPosition, setWatermarkPosition] = useState('bottom-right');
@@ -67,12 +53,14 @@ export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
         />
       </Space>
 
-      <FunctionButton
+      <Button
+        type={'primary'}
         onClick={handleAddWatermark}
-        disabled={images.length === 0 || !watermarkText}
+        disabled={images.length === 0 || !watermarkText || isWatermarking}
+        loading={isWatermarking}
       >
         Add Watermark
-      </FunctionButton>
+      </Button>
     </Flex>
   );
 };
