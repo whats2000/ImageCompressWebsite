@@ -118,7 +118,7 @@ export const MainContent: React.FC = () => {
   const handleAddWatermark = async (
     watermarkText: string,
     watermarkPosition: string,
-    config?: Partial<WatermarkConfig>
+    config?: Partial<WatermarkConfig>,
   ) => {
     if (images.length === 0) {
       notify.warn('No images to watermark');
@@ -143,14 +143,14 @@ export const MainContent: React.FC = () => {
           opacity: config?.opacity,
           customPosition: config?.position,
           natural_size: config?.naturalSize,
-          preview_size: config?.previewSize
+          preview_size: config?.previewSize,
         };
 
         console.log('Watermark payload:', payload); // 调试信息
 
         const response = await axios.post(
           `${BACKEND_API_URL}/api/watermark`,
-          payload
+          payload,
         );
 
         const data = response.data;
@@ -192,7 +192,7 @@ export const MainContent: React.FC = () => {
           <ImagePreviewArea images={images} onDeleteImage={handleDeleteImage} />
 
           <Card>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction='vertical' style={{ width: '100%' }}>
               <WatermarkControls
                 images={images}
                 onAddWatermark={handleAddWatermark}
@@ -214,7 +214,7 @@ export const MainContent: React.FC = () => {
       )}
 
       <ToastContainer
-        position="bottom-right"
+        position='bottom-right'
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}

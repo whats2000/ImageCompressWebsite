@@ -58,7 +58,7 @@ const Dropdown = styled.div`
 `;
 
 const DropdownContent = styled.div<{ $isOpen: boolean }>`
-  display: ${props => props.$isOpen ? 'block' : 'none'};
+  display: ${(props) => (props.$isOpen ? 'block' : 'none')};
   position: absolute;
   right: 0;
   background-color: white;
@@ -87,21 +87,21 @@ export const Header: React.FC = () => {
     <NavBar>
       <NavContainer>
         <NavLeft>
-          <Logo src={logoImg} alt="Logo" />
+          <Logo src={logoImg} alt='Logo' />
           <BrandText>IMAGE COMPRESS</BrandText>
         </NavLeft>
         <NavRight>
-          <NavLink href="#">IMAGE COMPRESS</NavLink>
-          <Dropdown 
-            onMouseEnter={() => setIsDropdownOpen(true)} 
+          <NavLink href='#'>IMAGE COMPRESS</NavLink>
+          <Dropdown
+            onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
           >
-            <NavLink href="#">MORE ▼</NavLink>
+            <NavLink href='#'>MORE ▼</NavLink>
             <DropdownContent $isOpen={isDropdownOpen}>
-              <DropdownItem href="#">About</DropdownItem>
-              <DropdownItem href="#">Contact Us</DropdownItem>
-              <DropdownItem href="#">Privacy</DropdownItem>
-              <DropdownItem href="#">Terms</DropdownItem>
+              <DropdownItem href='#'>About</DropdownItem>
+              <DropdownItem href='#'>Contact Us</DropdownItem>
+              <DropdownItem href='#'>Privacy</DropdownItem>
+              <DropdownItem href='#'>Terms</DropdownItem>
             </DropdownContent>
           </Dropdown>
         </NavRight>

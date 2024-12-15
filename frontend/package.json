@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.5.2",
     "@types/styled-components": "^5.1.34",
     "antd": "^5.22.4",
     "axios": "^1.7.9",

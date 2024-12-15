@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const FooterContainer = styled.footer<{ $isVisible: boolean }>`
   position: fixed;
-  bottom: ${props => props.$isVisible ? '0' : '-100px'};
+  bottom: ${(props) => (props.$isVisible ? '0' : '-100px')};
   left: 0;
   width: 100%;
   background-color: var(--primary-color);
@@ -61,9 +61,9 @@ export const Footer: React.FC = () => {
       <FooterContent>
         <p>&copy; {currentYear} Image Compress. All rights reserved.</p>
         <FooterLinks>
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="#">Contact</a>
+          <a href='#'>Privacy</a>
+          <a href='#'>Terms</a>
+          <a href='#'>Contact</a>
         </FooterLinks>
       </FooterContent>
     </FooterContainer>

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { Button, Image, Space, Typography } from 'antd';
 import axios from 'axios';
 
 import { ProcessedImage } from '../../types';
 import { BACKEND_API_URL } from '../../styles/GlobalStyles.ts';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const PreviewArea = styled.div`
   width: 45%;
@@ -48,21 +50,6 @@ const PreviewImage = styled.img`
   border-radius: 4px;
 `;
 
-const DeleteButton = styled.button`
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-
-  svg {
-    width: 20px;
-    height: 20px;
-    fill: red;
-  }
-`;
-
 interface ImagePreviewAreaProps {
   images: ProcessedImage[];
   onDeleteImage: (imageId: string) => void;
@@ -73,6 +60,8 @@ export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({
   onDeleteImage,
 }) => {
   const [imageSrcs, setImageSrcs] = useState<Record<string, string>>({});
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -99,28 +88,49 @@ export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({
   if (images.length === 0) return null;
 
   return (
-    <PreviewArea>
-      <h3>Selected Images</h3>
-      <ImagePreviews $imageCount={images.length}>
-        {images.map((image) => (
-          <ImagePreview key={image.imageId}>
-            {imageSrcs[image.imageId] ? (
-              <PreviewImage
-                src={imageSrcs[image.imageId]}
-                alt={image.fileName}
-              />
-            ) : (
-              <p>Loading...</p>
-            )}
-            <p>{image.fileName}</p>
-            <DeleteButton onClick={() => onDeleteImage(image.imageId)}>
-              <svg viewBox='0 0 24 24'>
-                <path d='M3 6h18M9 6v12M15 6v12M4 6l1 14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1l1-14M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2'></path>
-              </svg>
-            </DeleteButton>
-          </ImagePreview>
-        ))}
-      </ImagePreviews>
-    </PreviewArea>
+    <>
+      {previewImage && (
+        <Image
+          wrapperStyle={{ display: 'none' }}
+          preview={{
+            visible: previewOpen,
+            onVisibleChange: (visible) => setPreviewOpen(visible),
+            afterOpenChange: (visible) => !visible && setPreviewImage(''),
+          }}
+          src={previewImage}
+        />
+      )}
+      <PreviewArea>
+        <h3>Selected Images</h3>
+        <ImagePreviews $imageCount={images.length}>
+          {images.map((image) => (
+            <ImagePreview key={image.imageId}>
+              <Space direction={'vertical'}>
+                {imageSrcs[image.imageId] ? (
+                  <PreviewImage
+                    src={imageSrcs[image.imageId]}
+                    alt={image.fileName}
+                    onClick={() => {
+                      setPreviewImage(imageSrcs[image.imageId]);
+                      setPreviewOpen(true);
+                    }}
+                  />
+                ) : (
+                  <p>Loading...</p>
+                )}
+                <Space>
+                  <Typography.Text>{image.fileName}</Typography.Text>
+                  <Button
+                    icon={<DeleteOutlined />}
+                    danger={true}
+                    onClick={() => onDeleteImage(image.imageId)}
+                  />
+                </Space>
+              </Space>
+            </ImagePreview>
+          ))}
+        </ImagePreviews>
+      </PreviewArea>
+    </>
   );
 };

@@ -9,7 +9,7 @@ interface NotificationHook {
 
 export const useNotification = (): NotificationHook => {
   const defaultOptions: ToastOptions = {
-    position: "bottom-right",
+    position: 'bottom-right',
     autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: true,
@@ -19,7 +19,7 @@ export const useNotification = (): NotificationHook => {
   };
 
   const showNotification = (message: string, type: TypeOptions) => {
-    switch(type) {
+    switch (type) {
       case 'success':
         toast.success(message, defaultOptions);
         break;

@@ -58,5 +58,5 @@ export const GlobalStyles = createGlobalStyle`
   }
 `;
 
-export const BACKEND_API_URL = "http://127.0.0.1:5000";
+export const BACKEND_API_URL = 'http://127.0.0.1:5000';
 export const UPLOAD_FILE_BASE_URL = `${window.location.origin}/backend`;

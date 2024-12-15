@@ -111,47 +111,49 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
 
   const getDownloadButtonText = () => {
     const count = images.length;
-    const type = selectedDownloadType.charAt(0).toUpperCase() + selectedDownloadType.slice(1);
+    const type =
+      selectedDownloadType.charAt(0).toUpperCase() +
+      selectedDownloadType.slice(1);
     return `Download ${type} ${count === 1 ? 'Image' : `${count} Images`}`;
   };
 
   return (
-    <DownloadCard title="Download Images">
-      <Space direction="vertical" style={{ width: '100%' }}>
+    <DownloadCard title='Download Images'>
+      <Space direction='vertical' style={{ width: '100%' }}>
         <Typography.Text>Select download format:</Typography.Text>
-        
+
         <DownloadOptions>
-          <Radio.Group 
+          <Radio.Group
             value={selectedDownloadType}
             onChange={(e) => setSelectedDownloadType(e.target.value)}
-            buttonStyle="solid"
+            buttonStyle='solid'
           >
-            <Radio.Button value="original">Original</Radio.Button>
-            <Radio.Button value="compressed">Compressed</Radio.Button>
-            <Radio.Button value="watermarked">Watermarked</Radio.Button>
+            <Radio.Button value='original'>Original</Radio.Button>
+            <Radio.Button value='compressed'>Compressed</Radio.Button>
+            <Radio.Button value='watermarked'>Watermarked</Radio.Button>
           </Radio.Group>
         </DownloadOptions>
 
         {selectedDownloadType === 'compressed' && (
           <DownloadOptions>
             <Typography.Text>Compression format:</Typography.Text>
-            <Radio.Group 
+            <Radio.Group
               value={compressionFormat}
               onChange={(e) => setCompressionFormat(e.target.value)}
-              buttonStyle="solid"
+              buttonStyle='solid'
             >
-              <Radio.Button value="webp">WebP</Radio.Button>
-              <Radio.Button value="jpeg">JPEG</Radio.Button>
+              <Radio.Button value='webp'>WebP</Radio.Button>
+              <Radio.Button value='jpeg'>JPEG</Radio.Button>
             </Radio.Group>
           </DownloadOptions>
         )}
 
-        <Button 
-          type="primary" 
+        <Button
+          type='primary'
           icon={<DownloadOutlined />}
           onClick={handleDownload}
           disabled={images.length === 0}
-          size="large"
+          size='large'
         >
           {getDownloadButtonText()}
         </Button>

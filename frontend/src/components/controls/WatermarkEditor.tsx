@@ -63,10 +63,11 @@ const DraggableWatermark = styled.div<{ $isDragging: boolean }>`
   cursor: move;
   user-select: none;
   transform-origin: center;
-  background: ${({ $isDragging }) => ($isDragging ? 'rgba(0,0,0,0.1)' : 'transparent')};
+  background: ${({ $isDragging }) =>
+    $isDragging ? 'rgba(0,0,0,0.1)' : 'transparent'};
   padding: 4px;
   white-space: nowrap;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   pointer-events: all;
   font-size: 36px;
 `;
@@ -111,10 +112,13 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
   const [config, setConfig] = useState<WatermarkConfig>(initialConfig);
   const [isDragging, setIsDragging] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
+  const [naturalSize, setNaturalSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       text: initialText || prev.text,
     }));
@@ -125,52 +129,55 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
     if (imageRef.current) {
       const { naturalWidth, naturalHeight, width, height } = imageRef.current;
       setNaturalSize({ width: naturalWidth, height: naturalHeight });
-      setConfig(prev => ({
+      setConfig((prev) => ({
         ...prev,
         naturalSize: { width: naturalWidth, height: naturalHeight },
-        previewSize: { width, height }
+        previewSize: { width, height },
       }));
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!imageRef.current) return;
-    
+
     setIsDragging(true);
     const rect = imageRef.current.getBoundingClientRect();
-    
+
     // 計算點擊位置相對於圖片的百分比
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    setConfig(prev => ({
+
+    setConfig((prev) => ({
       ...prev,
       position: {
         x: Math.max(0, Math.min(100, x)),
         y: Math.max(0, Math.min(100, y)),
       },
     }));
-    
+
     e.preventDefault();
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !imageRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging || !imageRef.current) return;
 
-    const rect = imageRef.current.getBoundingClientRect();
-    
-    // 使用圖片的實際顯示尺寸計算位置
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    setConfig(prev => ({
-      ...prev,
-      position: {
-        x: Math.max(0, Math.min(100, x)),
-        y: Math.max(0, Math.min(100, y)),
-      },
-    }));
-  }, [isDragging]);
+      const rect = imageRef.current.getBoundingClientRect();
+
+      // 使用圖片的實際顯示尺寸計算位置
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      setConfig((prev) => ({
+        ...prev,
+        position: {
+          x: Math.max(0, Math.min(100, x)),
+          y: Math.max(0, Math.min(100, y)),
+        },
+      }));
+    },
+    [isDragging],
+  );
 
   useEffect(() => {
     if (isDragging) {
@@ -185,19 +192,19 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
 
   return (
     <Modal
-      title="Watermark Editor"
+      title='Watermark Editor'
       open={visible}
       onCancel={onClose}
-      width="90vw"
+      width='90vw'
       centered
       bodyStyle={{ padding: '16px' }}
       footer={[
-        <Button key="cancel" onClick={onClose}>
+        <Button key='cancel' onClick={onClose}>
           Cancel
         </Button>,
         <Button
-          key="apply"
-          type="primary"
+          key='apply'
+          type='primary'
           onClick={() => {
             onApply(config);
           }}
@@ -213,7 +220,7 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
               <PreviewImage
                 ref={imageRef}
                 src={selectedImage.previewUrl}
-                alt="Preview"
+                alt='Preview'
                 onLoad={handleImageLoad}
                 onError={(e) => {
                   console.error('Image load error:', e);
@@ -245,8 +252,10 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
             <Label>Watermark Text</Label>
             <Input
               value={config.text}
-              onChange={e => setConfig(prev => ({ ...prev, text: e.target.value }))}
-              placeholder="Enter watermark text"
+              onChange={(e) =>
+                setConfig((prev) => ({ ...prev, text: e.target.value }))
+              }
+              placeholder='Enter watermark text'
             />
           </ControlGroup>
 
@@ -256,10 +265,12 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
               min={0}
               max={100}
               value={config.position.x}
-              onChange={value => setConfig(prev => ({
-                ...prev,
-                position: { ...prev.position, x: value }
-              }))}
+              onChange={(value) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  position: { ...prev.position, x: value },
+                }))
+              }
             />
           </ControlGroup>
 
@@ -269,10 +280,12 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
               min={0}
               max={100}
               value={config.position.y}
-              onChange={value => setConfig(prev => ({
-                ...prev,
-                position: { ...prev.position, y: value }
-              }))}
+              onChange={(value) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  position: { ...prev.position, y: value },
+                }))
+              }
             />
           </ControlGroup>
 
@@ -280,7 +293,9 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
             <Label>Color</Label>
             <ColorPicker
               value={config.color}
-              onChange={(color) => setConfig(prev => ({ ...prev, color: color.toHexString() }))}
+              onChange={(color) =>
+                setConfig((prev) => ({ ...prev, color: color.toHexString() }))
+              }
             />
           </ControlGroup>
 
@@ -290,7 +305,9 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
               min={-180}
               max={180}
               value={config.rotation}
-              onChange={value => setConfig(prev => ({ ...prev, rotation: value }))}
+              onChange={(value) =>
+                setConfig((prev) => ({ ...prev, rotation: value }))
+              }
             />
           </ControlGroup>
 
@@ -301,17 +318,20 @@ const WatermarkEditor: React.FC<WatermarkEditorProps> = ({
               max={1}
               step={0.01}
               value={config.opacity}
-              onChange={value => setConfig(prev => ({ ...prev, opacity: value }))}
+              onChange={(value) =>
+                setConfig((prev) => ({ ...prev, opacity: value }))
+              }
             />
           </ControlGroup>
 
           {naturalSize && (
             <ControlGroup>
-              <Typography.Text type="secondary">
+              <Typography.Text type='secondary'>
                 Original Size: {naturalSize.width}x{naturalSize.height}px
               </Typography.Text>
-              <Typography.Text type="secondary">
-                Position: {Math.round(config.position.x)}%, {Math.round(config.position.y)}%
+              <Typography.Text type='secondary'>
+                Position: {Math.round(config.position.x)}%,{' '}
+                {Math.round(config.position.y)}%
               </Typography.Text>
             </ControlGroup>
           )}

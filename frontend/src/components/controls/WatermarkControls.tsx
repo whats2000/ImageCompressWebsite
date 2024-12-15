@@ -25,7 +25,11 @@ const ButtonGroup = styled(Space)`
 `;
 
 interface WatermarkControlsProps {
-  onAddWatermark: (text: string, position: string, config?: Partial<WatermarkConfig>) => void;
+  onAddWatermark: (
+    text: string,
+    position: string,
+    config?: Partial<WatermarkConfig>,
+  ) => void;
   images: ProcessedImage[];
   isWatermarking: boolean;
 }
@@ -44,7 +48,7 @@ const positionMap = {
   'top-right': { x: 95, y: 5 },
   'bottom-left': { x: 5, y: 95 },
   'bottom-right': { x: 95, y: 95 },
-  'center': { x: 50, y: 50 },
+  center: { x: 50, y: 50 },
 };
 
 const WatermarkControls: React.FC<WatermarkControlsProps> = ({
@@ -55,7 +59,8 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   const [watermarkText, setWatermarkText] = useState('');
   const [watermarkPosition, setWatermarkPosition] = useState('bottom-right');
   const [editorVisible, setEditorVisible] = useState(false);
-  const [lastWatermarkConfig, setLastWatermarkConfig] = useState<WatermarkConfig>(defaultWatermarkConfig);
+  const [lastWatermarkConfig, setLastWatermarkConfig] =
+    useState<WatermarkConfig>(defaultWatermarkConfig);
 
   const handleAdvancedEdit = () => {
     if (!watermarkText) {
@@ -83,36 +88,38 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
 
     // 使用預設位置配置
     const position = positionMap[watermarkPosition as keyof typeof positionMap];
-    
+
     // 使用上次的配置，但更新文字和位置
     const quickConfig = {
       ...lastWatermarkConfig,
       text: watermarkText,
-      position: position
+      position: position,
     };
 
     onAddWatermark(watermarkText, watermarkPosition, quickConfig);
   };
 
-  const handleWatermarkTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWatermarkTextChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const newText = e.target.value;
     setWatermarkText(newText);
-    setLastWatermarkConfig(prev => ({ ...prev, text: newText }));
+    setLastWatermarkConfig((prev) => ({ ...prev, text: newText }));
   };
 
   return (
     <Container>
       <InputGroup>
         <Input
-          type="text"
-          id="watermarkText"
+          type='text'
+          id='watermarkText'
           style={{ width: 200 }}
           value={watermarkText}
           onChange={handleWatermarkTextChange}
-          placeholder="Enter watermark text"
+          placeholder='Enter watermark text'
         />
         <Select
-          id="watermarkPosition"
+          id='watermarkPosition'
           style={{ width: 120 }}
           options={[
             { value: 'top-left', label: 'Top Left' },
@@ -128,7 +135,7 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
 
       <ButtonGroup>
         <Button
-          type="primary"
+          type='primary'
           onClick={handleQuickAdd}
           disabled={images.length === 0 || !watermarkText || isWatermarking}
           loading={isWatermarking}
