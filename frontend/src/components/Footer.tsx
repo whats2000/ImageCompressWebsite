@@ -29,6 +29,11 @@ const FooterLinks = styled.div`
     text-decoration: none;
     margin-left: 2rem;
   }
+
+  // Hide when window is small
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 export const Footer: React.FC = () => {

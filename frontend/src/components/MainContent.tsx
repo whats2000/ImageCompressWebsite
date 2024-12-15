@@ -15,7 +15,7 @@ import { ImagePreviewArea } from './upload/ImagePreviewArea';
 import { CompressionControls } from './controls/CompressionControls';
 import WatermarkControls from './controls/WatermarkControls';
 import { DownloadControls } from './controls/DownloadControls';
-import { Card, Space } from 'antd';
+import { Space } from 'antd';
 
 const MainContainer = styled.main`
   max-width: 1200px;
@@ -190,26 +190,23 @@ export const MainContent: React.FC = () => {
       {images.length > 0 && (
         <>
           <ImagePreviewArea images={images} onDeleteImage={handleDeleteImage} />
-
-          <Card>
-            <Space direction='vertical' style={{ width: '100%' }}>
-              <WatermarkControls
-                images={images}
-                onAddWatermark={handleAddWatermark}
-                isWatermarking={isWatermarking}
-              />
-              <CompressionControls
-                images={images}
-                compressionQuality={compressionQuality}
-                compressionFormat={compressionFormat}
-                onQualityChange={setCompressionQuality}
-                onFormatChange={setCompressionFormat}
-                onCompress={handleCompressImages}
-                isCompressing={isCompressing}
-              />
-              <DownloadControls images={images} lastOperation={lastOperation} />
-            </Space>
-          </Card>
+          <Space direction='vertical' style={{ width: '100%' }}>
+            <WatermarkControls
+              images={images}
+              onAddWatermark={handleAddWatermark}
+              isWatermarking={isWatermarking}
+            />
+            <CompressionControls
+              images={images}
+              compressionQuality={compressionQuality}
+              compressionFormat={compressionFormat}
+              onQualityChange={setCompressionQuality}
+              onFormatChange={setCompressionFormat}
+              onCompress={handleCompressImages}
+              isCompressing={isCompressing}
+            />
+            <DownloadControls images={images} lastOperation={lastOperation} />
+          </Space>
         </>
       )}
 
