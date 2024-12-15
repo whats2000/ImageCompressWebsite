@@ -1,8 +1,11 @@
 import uuid
 import os
+from datetime import datetime
 
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
+
+from utils.image_cleanup import load_image_timestamps, save_image_timestamps
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -38,6 +41,11 @@ def upload_image(file: 'FileStorage') -> dict:
 
     # Save file
     file.save(filepath)
+
+    # Record upload timestamp
+    timestamps = load_image_timestamps()
+    timestamps[filepath] = str(datetime.now())
+    save_image_timestamps(timestamps)
 
     # Return success response
     return {

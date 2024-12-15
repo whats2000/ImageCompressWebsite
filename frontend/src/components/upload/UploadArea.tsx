@@ -63,6 +63,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({ onUploadComplete }) => {
     const files = e.target.files;
     if (files) {
       void processFiles(files);
+      e.target.value = '';
     }
   };
 

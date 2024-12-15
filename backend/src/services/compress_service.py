@@ -1,7 +1,9 @@
 import os
+from datetime import datetime
 
 from PIL import Image
 
+from utils.image_cleanup import load_image_timestamps, save_image_timestamps
 from utils.jpeg_compression import jpeg_compression
 
 
@@ -43,6 +45,11 @@ def compress_image(image_id: str, compression_format: str, compression_quality: 
                 ).save(compressed_path)
             else:
                 img.save(compressed_path, format=compression_format, quality=compression_quality)
+
+        # Record compression timestamp
+        timestamps = load_image_timestamps()
+        timestamps[compressed_path] = str(datetime.now())
+        save_image_timestamps(timestamps)
 
         return {
             'success': True,

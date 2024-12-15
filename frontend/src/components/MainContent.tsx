@@ -52,14 +52,12 @@ export const MainContent: React.FC = () => {
       );
 
       if (response.data.success) {
-        setImages((prev) => prev.filter((img) => img.imageId !== imageId));
         notify.success('Image deleted successfully');
-      } else {
-        notify.error('Failed to delete image');
       }
     } catch (error) {
-      notify.error('Error deleting image');
       console.error(error);
+    } finally {
+      setImages((prev) => prev.filter((img) => img.imageId !== imageId));
     }
   };
 
