@@ -26,7 +26,7 @@ export const useNotification = (): NotificationHook => {
       case 'error':
         toast.error(message, defaultOptions);
         break;
-      case 'warn':
+      case 'warning':
         toast.warn(message, defaultOptions);
         break;
       case 'info':
@@ -40,7 +40,7 @@ export const useNotification = (): NotificationHook => {
   return {
     success: (message: string) => showNotification(message, 'success'),
     error: (message: string) => showNotification(message, 'error'),
-    warn: (message: string) => showNotification(message, 'warn'),
+    warn: (message: string) => showNotification(message, 'warning'),
     info: (message: string) => showNotification(message, 'info'),
   };
 };
