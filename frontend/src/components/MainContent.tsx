@@ -7,12 +7,13 @@ import axios from 'axios';
 import { ProcessedImage } from '../types';
 import { BACKEND_API_URL } from '../styles/GlobalStyles';
 import { useNotification } from '../hooks/useNotification';
+import { WatermarkConfig } from './controls/WatermarkEditor';
 
 // Import subcomponents
 import { UploadArea } from './upload/UploadArea';
 import { ImagePreviewArea } from './upload/ImagePreviewArea';
 import { CompressionControls } from './controls/CompressionControls';
-import { WatermarkControls } from './controls/WatermarkControls';
+import WatermarkControls from './controls/WatermarkControls';
 import { DownloadControls } from './controls/DownloadControls';
 import { Card, Space } from 'antd';
 
@@ -117,6 +118,7 @@ export const MainContent: React.FC = () => {
   const handleAddWatermark = async (
     watermarkText: string,
     watermarkPosition: string,
+    config?: Partial<WatermarkConfig>
   ) => {
     if (images.length === 0) {
       notify.warn('No images to watermark');
@@ -131,11 +133,25 @@ export const MainContent: React.FC = () => {
 
     try {
       const watermarkPromises = images.map(async (image) => {
-        const response = await axios.post(`${BACKEND_API_URL}/api/watermark`, {
+        // 构建请求载荷，包含原始图片尺寸信息
+        const payload = {
           image_id: image.imageId,
           watermark_text: watermarkText,
-          position: watermarkPosition,
-        });
+          position: config?.position || watermarkPosition,
+          color: config?.color,
+          rotation: config?.rotation,
+          opacity: config?.opacity,
+          customPosition: config?.position,
+          natural_size: config?.naturalSize,
+          preview_size: config?.previewSize
+        };
+
+        console.log('Watermark payload:', payload); // 调试信息
+
+        const response = await axios.post(
+          `${BACKEND_API_URL}/api/watermark`,
+          payload
+        );
 
         const data = response.data;
 
@@ -176,7 +192,7 @@ export const MainContent: React.FC = () => {
           <ImagePreviewArea images={images} onDeleteImage={handleDeleteImage} />
 
           <Card>
-            <Space direction={'vertical'}>
+            <Space direction="vertical" style={{ width: '100%' }}>
               <WatermarkControls
                 images={images}
                 onAddWatermark={handleAddWatermark}
@@ -198,7 +214,7 @@ export const MainContent: React.FC = () => {
       )}
 
       <ToastContainer
-        position='bottom-right'
+        position="bottom-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}

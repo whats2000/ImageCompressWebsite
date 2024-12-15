@@ -1,45 +1,119 @@
 import React, { useState } from 'react';
-
+import { Button, Input, Select, Space } from 'antd';
+import styled from 'styled-components';
 import { ProcessedImage } from '../../types';
-import { Button, Flex, Input, Select, Space, Typography } from 'antd';
+import WatermarkEditor, { WatermarkConfig } from './WatermarkEditor';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+`;
+
+const InputGroup = styled(Space)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ButtonGroup = styled(Space)`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+`;
 
 interface WatermarkControlsProps {
+  onAddWatermark: (text: string, position: string, config?: Partial<WatermarkConfig>) => void;
   images: ProcessedImage[];
-  onAddWatermark: (text: string, position: string) => void;
   isWatermarking: boolean;
 }
 
-export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
-  images,
+// Default watermark configuration
+const defaultWatermarkConfig: WatermarkConfig = {
+  text: '',
+  position: { x: 50, y: 50 },
+  color: '#ffffff',
+  rotation: 0,
+  opacity: 0.8,
+};
+
+const positionMap = {
+  'top-left': { x: 5, y: 5 },
+  'top-right': { x: 95, y: 5 },
+  'bottom-left': { x: 5, y: 95 },
+  'bottom-right': { x: 95, y: 95 },
+  'center': { x: 50, y: 50 },
+};
+
+const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   onAddWatermark,
+  images,
   isWatermarking,
 }) => {
   const [watermarkText, setWatermarkText] = useState('');
   const [watermarkPosition, setWatermarkPosition] = useState('bottom-right');
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [lastWatermarkConfig, setLastWatermarkConfig] = useState<WatermarkConfig>(defaultWatermarkConfig);
 
-  const handleAddWatermark = () => {
+  const handleAdvancedEdit = () => {
+    if (!watermarkText) {
+      alert('Please enter watermark text first');
+      return;
+    }
+    setEditorVisible(true);
+  };
+
+  const handleEditorClose = () => {
+    setEditorVisible(false);
+  };
+
+  const handleEditorApply = (config: WatermarkConfig) => {
+    setLastWatermarkConfig(config); // Save the last configuration
+    onAddWatermark(config.text, watermarkPosition, config);
+    setEditorVisible(false);
+  };
+
+  const handleQuickAdd = () => {
     if (!watermarkText) {
       alert('Please enter watermark text');
       return;
     }
-    onAddWatermark(watermarkText, watermarkPosition);
+
+    // 使用預設位置配置
+    const position = positionMap[watermarkPosition as keyof typeof positionMap];
+    
+    // 使用上次的配置，但更新文字和位置
+    const quickConfig = {
+      ...lastWatermarkConfig,
+      text: watermarkText,
+      position: position
+    };
+
+    onAddWatermark(watermarkText, watermarkPosition, quickConfig);
+  };
+
+  const handleWatermarkTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newText = e.target.value;
+    setWatermarkText(newText);
+    setLastWatermarkConfig(prev => ({ ...prev, text: newText }));
   };
 
   return (
-    <Flex align={'center'} gap={10} justify={'center'} wrap={'wrap'}>
-      <Space wrap={true}>
-        <Typography.Text>Watermark Text:</Typography.Text>
+    <Container>
+      <InputGroup>
         <Input
-          type='text'
-          id='watermarkText'
+          type="text"
+          id="watermarkText"
+          style={{ width: 200 }}
           value={watermarkText}
-          onChange={(e) => setWatermarkText(e.target.value)}
-          placeholder='Enter watermark text'
+          onChange={handleWatermarkTextChange}
+          placeholder="Enter watermark text"
         />
-      </Space>
-      <Space wrap={true}>
-        <Typography.Text>Position:</Typography.Text>
         <Select
+          id="watermarkPosition"
+          style={{ width: 120 }}
           options={[
             { value: 'top-left', label: 'Top Left' },
             { value: 'top-right', label: 'Top Right' },
@@ -47,20 +121,38 @@ export const WatermarkControls: React.FC<WatermarkControlsProps> = ({
             { value: 'bottom-right', label: 'Bottom Right' },
             { value: 'center', label: 'Center' },
           ]}
-          id='watermarkPosition'
           value={watermarkPosition}
-          onSelect={(value) => setWatermarkPosition(value)}
+          onSelect={(value: string) => setWatermarkPosition(value)}
         />
-      </Space>
+      </InputGroup>
 
-      <Button
-        type={'primary'}
-        onClick={handleAddWatermark}
-        disabled={images.length === 0 || !watermarkText || isWatermarking}
-        loading={isWatermarking}
-      >
-        Add Watermark
-      </Button>
-    </Flex>
+      <ButtonGroup>
+        <Button
+          type="primary"
+          onClick={handleQuickAdd}
+          disabled={images.length === 0 || !watermarkText || isWatermarking}
+          loading={isWatermarking}
+        >
+          Quick Add
+        </Button>
+        <Button
+          onClick={handleAdvancedEdit}
+          disabled={images.length === 0 || !watermarkText || isWatermarking}
+        >
+          Advanced Edit
+        </Button>
+      </ButtonGroup>
+
+      <WatermarkEditor
+        visible={editorVisible}
+        onClose={handleEditorClose}
+        onApply={handleEditorApply}
+        selectedImage={images.length > 0 ? images[0] : null}
+        initialText={watermarkText}
+        initialConfig={lastWatermarkConfig}
+      />
+    </Container>
   );
 };
+
+export default WatermarkControls;

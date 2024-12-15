@@ -2,6 +2,8 @@ export interface ProcessedImage {
   imageId: string;
   fileName: string;
   originalUrl: string;
+  url: string;
+  previewUrl?: string;
   compressedUrl?: string;
   watermarkedUrl?: string;
 }

@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-
 import { ProcessedImage } from '../../types';
 import { BACKEND_API_URL } from '../../styles/GlobalStyles';
-import { Dropdown, Flex, Select, Typography } from 'antd';
+import { Button, Card, Radio, Space, Typography } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
+import styled from 'styled-components';
+
+const DownloadCard = styled(Card)`
+  width: 100%;
+  text-align: center;
+`;
+
+const DownloadOptions = styled(Space)`
+  margin-bottom: 16px;
+`;
 
 interface DownloadControlsProps {
   images: ProcessedImage[];
@@ -44,7 +54,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
 
     try {
       const downloadPromises = images.map(async (image) => {
-        // Determine a download type based on backend's expectations
+        // Determine download type based on selection
         let downloadType: string;
         switch (selectedDownloadType) {
           case 'compressed':
@@ -67,75 +77,85 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
           },
         );
 
-        // Create a download link
+        // Create and trigger download
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
 
-        // Determine filename based on a download type
+        // Set filename based on download type
         const extension =
           downloadType === 'original'
             ? image.fileName.split('.').pop()
             : downloadType === 'watermarked'
-              ? 'watermarked'
-              : downloadType;
-        link.download = `${image.fileName.split('.')[0]}_${downloadType}.${extension}`;
+              ? 'watermarked.png'
+              : `${downloadType}`;
+        const filename = `${image.fileName.split('.')[0]}_${downloadType}.${extension}`;
+        link.download = filename;
 
+        // Trigger download
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
+
+        return filename;
       });
 
-      await Promise.all(downloadPromises);
-      toast.success('Downloads initiated');
+      const downloadedFiles = await Promise.all(downloadPromises);
+      toast.success(`Downloaded ${downloadedFiles.length} image(s)`);
     } catch (error) {
       toast.error('Error downloading images');
       console.error(error);
     }
   };
 
-  return (
-    <Flex align={'center'} justify={'center'} gap={10} wrap={'wrap'}>
-      <Typography.Text>Compression Format:</Typography.Text>
-      <Select
-        id='compressionFormat'
-        value={compressionFormat}
-        options={[
-          { value: 'webp', label: 'WebP' },
-          { value: 'jpeg', label: 'JPEG' },
-        ]}
-        onSelect={setCompressionFormat}
-        disabled={selectedDownloadType !== 'compressed'}
-      />
+  const getDownloadButtonText = () => {
+    const count = images.length;
+    const type = selectedDownloadType.charAt(0).toUpperCase() + selectedDownloadType.slice(1);
+    return `Download ${type} ${count === 1 ? 'Image' : `${count} Images`}`;
+  };
 
-      <div>
-        <Dropdown.Button
-          menu={{
-            items: [
-              {
-                key: 'compressed',
-                label: 'Compressed',
-                onClick: () => setSelectedDownloadType('compressed'),
-              },
-              {
-                key: 'original',
-                label: 'Original',
-                onClick: () => setSelectedDownloadType('original'),
-              },
-              {
-                key: 'watermarked',
-                label: 'Watermarked',
-                onClick: () => setSelectedDownloadType('watermarked'),
-              },
-            ],
-          }}
-          type={'primary'}
+  return (
+    <DownloadCard title="Download Images">
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <Typography.Text>Select download format:</Typography.Text>
+        
+        <DownloadOptions>
+          <Radio.Group 
+            value={selectedDownloadType}
+            onChange={(e) => setSelectedDownloadType(e.target.value)}
+            buttonStyle="solid"
+          >
+            <Radio.Button value="original">Original</Radio.Button>
+            <Radio.Button value="compressed">Compressed</Radio.Button>
+            <Radio.Button value="watermarked">Watermarked</Radio.Button>
+          </Radio.Group>
+        </DownloadOptions>
+
+        {selectedDownloadType === 'compressed' && (
+          <DownloadOptions>
+            <Typography.Text>Compression format:</Typography.Text>
+            <Radio.Group 
+              value={compressionFormat}
+              onChange={(e) => setCompressionFormat(e.target.value)}
+              buttonStyle="solid"
+            >
+              <Radio.Button value="webp">WebP</Radio.Button>
+              <Radio.Button value="jpeg">JPEG</Radio.Button>
+            </Radio.Group>
+          </DownloadOptions>
+        )}
+
+        <Button 
+          type="primary" 
+          icon={<DownloadOutlined />}
           onClick={handleDownload}
+          disabled={images.length === 0}
+          size="large"
         >
-          Download {selectedDownloadType} Images
-        </Dropdown.Button>
-      </div>
-    </Flex>
+          {getDownloadButtonText()}
+        </Button>
+      </Space>
+    </DownloadCard>
   );
 };
