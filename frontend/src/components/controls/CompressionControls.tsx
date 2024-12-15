@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ProcessedImage } from '../../types';
-import { Button, Flex, Select, Slider, Space, Typography } from 'antd';
+import { Button, Card, Flex, Select, Slider, Typography } from 'antd';
 
 interface CompressionControlsProps {
   images: ProcessedImage[];
@@ -23,41 +23,47 @@ export const CompressionControls: React.FC<CompressionControlsProps> = ({
   isCompressing,
 }) => {
   return (
-    <Flex justify={'center'} gap={10} wrap={'wrap'}>
-      <Space wrap={true}>
-        <label htmlFor='qualitySlider'>Compression Quality:</label>
-        <Slider
-          id='qualitySlider'
-          min={0}
-          max={100}
-          value={compressionQuality * 100}
-          onChange={(value) => onQualityChange(value / 100)}
-          style={{ width: '200px' }}
-        />
-        <span>{Math.round(compressionQuality * 100)}%</span>
-      </Space>
-
-      <Space wrap={true}>
-        <Typography.Text>Compression Format:</Typography.Text>
-        <Select
-          id='compressionFormat'
-          value={compressionFormat}
-          options={[
-            { value: 'jpeg', label: 'JPEG' },
-            { value: 'webp', label: 'WebP' },
-          ]}
-          onSelect={(value) => onFormatChange(value as 'jpeg' | 'webp')}
-        />
-      </Space>
-
-      <Button
-        type={'primary'}
-        onClick={onCompress}
-        disabled={images.length === 0 || isCompressing}
-        loading={isCompressing}
+    <Card title={'Compression Configuration'}>
+      <Flex
+        justify={'center'}
+        align={'center'}
+        gap={10}
+        wrap={'wrap'}
+        vertical={true}
       >
-        Compress Images
-      </Button>
-    </Flex>
+        <Flex wrap={'wrap'} gap={16} justify={'center'}>
+          <Typography.Text>Compression Quality:</Typography.Text>
+          <Slider
+            id='qualitySlider'
+            min={0}
+            max={100}
+            value={compressionQuality * 100}
+            onChange={(value) => onQualityChange(value / 100)}
+            style={{ width: '200px' }}
+          />
+          <span>{Math.round(compressionQuality * 100)}%</span>
+        </Flex>
+        <Flex wrap={'wrap'} gap={16} justify={'center'}>
+          <Typography.Text>Compression Format:</Typography.Text>
+          <Select
+            id='compressionFormat'
+            value={compressionFormat}
+            options={[
+              { value: 'jpeg', label: 'JPEG' },
+              { value: 'webp', label: 'WebP' },
+            ]}
+            onSelect={(value) => onFormatChange(value as 'jpeg' | 'webp')}
+          />
+          <Button
+            type={'primary'}
+            onClick={onCompress}
+            disabled={images.length === 0 || isCompressing}
+            loading={isCompressing}
+          >
+            Compress Images
+          </Button>
+        </Flex>
+      </Flex>
+    </Card>
   );
 };

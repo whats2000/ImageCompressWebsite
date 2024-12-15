@@ -1,28 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Input, Select, Space } from 'antd';
-import styled from 'styled-components';
+import { Button, Card, Flex, Input, Select, Space } from 'antd';
+
 import { ProcessedImage } from '../../types';
 import WatermarkEditor, { WatermarkConfig } from './WatermarkEditor';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-`;
-
-const InputGroup = styled(Space)`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const ButtonGroup = styled(Space)`
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-`;
 
 interface WatermarkControlsProps {
   onAddWatermark: (
@@ -100,7 +80,7 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   };
 
   const handleWatermarkTextChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const newText = e.target.value;
     setWatermarkText(newText);
@@ -108,57 +88,66 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   };
 
   return (
-    <Container>
-      <InputGroup>
-        <Input
-          type='text'
-          id='watermarkText'
-          style={{ width: 200 }}
-          value={watermarkText}
-          onChange={handleWatermarkTextChange}
-          placeholder='Enter watermark text'
-        />
-        <Select
-          id='watermarkPosition'
-          style={{ width: 120 }}
-          options={[
-            { value: 'top-left', label: 'Top Left' },
-            { value: 'top-right', label: 'Top Right' },
-            { value: 'bottom-left', label: 'Bottom Left' },
-            { value: 'bottom-right', label: 'Bottom Right' },
-            { value: 'center', label: 'Center' },
-          ]}
-          value={watermarkPosition}
-          onSelect={(value: string) => setWatermarkPosition(value)}
-        />
-      </InputGroup>
+    <Card title={'Watermark Configuration'}>
+      <Flex
+        wrap={'wrap'}
+        align={'center'}
+        justify={'center'}
+        vertical={true}
+        gap={16}
+      >
+        <Space direction={'vertical'} style={{ width: '100%' }}>
+          <Input.TextArea
+            id='watermarkText'
+            style={{ width: 200 }}
+            value={watermarkText}
+            onChange={handleWatermarkTextChange}
+            placeholder='Enter watermark text'
+          />
+          <Select
+            id='watermarkPosition'
+            style={{ width: 200 }}
+            options={[
+              { value: 'top-left', label: 'Top Left' },
+              { value: 'top-right', label: 'Top Right' },
+              { value: 'bottom-left', label: 'Bottom Left' },
+              { value: 'bottom-right', label: 'Bottom Right' },
+              { value: 'center', label: 'Center' },
+            ]}
+            value={watermarkPosition}
+            onSelect={(value: string) => setWatermarkPosition(value)}
+          />
+        </Space>
 
-      <ButtonGroup>
-        <Button
-          type='primary'
-          onClick={handleQuickAdd}
-          disabled={images.length === 0 || !watermarkText || isWatermarking}
-          loading={isWatermarking}
-        >
-          Quick Add
-        </Button>
-        <Button
-          onClick={handleAdvancedEdit}
-          disabled={images.length === 0 || !watermarkText || isWatermarking}
-        >
-          Advanced Edit
-        </Button>
-      </ButtonGroup>
+        <Flex wrap={'wrap'} gap={16} justify={'center'}>
+          <Button
+            type='primary'
+            onClick={handleQuickAdd}
+            disabled={images.length === 0 || !watermarkText || isWatermarking}
+            loading={isWatermarking}
+            style={{ width: 200 }}
+          >
+            Quick Add
+          </Button>
+          <Button
+            onClick={handleAdvancedEdit}
+            disabled={images.length === 0 || !watermarkText || isWatermarking}
+            style={{ width: 200 }}
+          >
+            Advanced Edit
+          </Button>
+        </Flex>
 
-      <WatermarkEditor
-        visible={editorVisible}
-        onClose={handleEditorClose}
-        onApply={handleEditorApply}
-        selectedImage={images.length > 0 ? images[0] : null}
-        initialText={watermarkText}
-        initialConfig={lastWatermarkConfig}
-      />
-    </Container>
+        <WatermarkEditor
+          visible={editorVisible}
+          onClose={handleEditorClose}
+          onApply={handleEditorApply}
+          selectedImage={images.length > 0 ? images[0] : null}
+          initialText={watermarkText}
+          initialConfig={lastWatermarkConfig}
+        />
+      </Flex>
+    </Card>
   );
 };
 
