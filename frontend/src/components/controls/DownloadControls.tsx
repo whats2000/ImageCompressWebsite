@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { ProcessedImage } from '../../types';
-import { BACKEND_API_URL } from '../../styles/GlobalStyles';
-import { Button, Card, Radio, Space, Typography } from 'antd';
+import { Button, Card, Flex, Radio, Typography } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
+
+import { ProcessedImage } from '../../types';
+import { BACKEND_API_URL } from '../../styles/GlobalStyles';
 
 const DownloadCard = styled(Card)`
   width: 100%;
   text-align: center;
-`;
-
-const DownloadOptions = styled(Space)`
-  margin-bottom: 16px;
 `;
 
 interface DownloadControlsProps {
@@ -119,10 +116,22 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
 
   return (
     <DownloadCard title='Download Images'>
-      <Space direction='vertical' style={{ width: '100%' }}>
+      <Flex
+        justify={'center'}
+        align={'center'}
+        gap={10}
+        wrap={'wrap'}
+        vertical={true}
+      >
         <Typography.Text>Select download format:</Typography.Text>
 
-        <DownloadOptions>
+        <Flex
+          wrap={'wrap'}
+          gap={16}
+          align={'center'}
+          justify={'center'}
+          vertical={true}
+        >
           <Radio.Group
             value={selectedDownloadType}
             onChange={(e) => setSelectedDownloadType(e.target.value)}
@@ -132,10 +141,16 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
             <Radio.Button value='compressed'>Compressed</Radio.Button>
             <Radio.Button value='watermarked'>Watermarked</Radio.Button>
           </Radio.Group>
-        </DownloadOptions>
+        </Flex>
 
         {selectedDownloadType === 'compressed' && (
-          <DownloadOptions>
+          <Flex
+            wrap={'wrap'}
+            gap={16}
+            align={'center'}
+            justify={'center'}
+            vertical={true}
+          >
             <Typography.Text>Compression format:</Typography.Text>
             <Radio.Group
               value={compressionFormat}
@@ -145,7 +160,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
               <Radio.Button value='webp'>WebP</Radio.Button>
               <Radio.Button value='jpeg'>JPEG</Radio.Button>
             </Radio.Group>
-          </DownloadOptions>
+          </Flex>
         )}
 
         <Button
@@ -153,11 +168,10 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
           icon={<DownloadOutlined />}
           onClick={handleDownload}
           disabled={images.length === 0}
-          size='large'
         >
           {getDownloadButtonText()}
         </Button>
-      </Space>
+      </Flex>
     </DownloadCard>
   );
 };
