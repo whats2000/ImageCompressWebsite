@@ -56,7 +56,7 @@ def test_compress_with_different_formats(client: 'FlaskClient', temp_image: str)
     jpeg_compress_data = {
         'image_id': upload_json['image_id'],
         'compression_format': 'jpeg',
-        'compression_quality': 50
+        'compression_quality': 0.5
     }
 
     jpeg_response = client.post(
@@ -77,7 +77,7 @@ def test_compress_invalid_image(client: 'FlaskClient'):
     compress_data = {
         'image_id': 'non_existent_id',
         'compression_format': 'jpeg',
-        'compression_quality': 50
+        'compression_quality': 0.5
     }
 
     response = client.post(

@@ -10,6 +10,7 @@ from api.status import status_bp
 from api.image import image_bp
 from api.download import download_bp
 from api.delete import delete_bp
+from api.basic_operation import basic_operation_bp
 from utils.image_cleanup import cleanup_images
 
 def create_app():
@@ -24,6 +25,7 @@ def create_app():
     api_app.register_blueprint(image_bp, url_prefix='/api')
     api_app.register_blueprint(download_bp, url_prefix='/api')
     api_app.register_blueprint(delete_bp, url_prefix='/api')
+    api_app.register_blueprint(basic_operation_bp, url_prefix='/api')
 
     
     def start_cleanup_task():
