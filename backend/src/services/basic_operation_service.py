@@ -1,5 +1,13 @@
 import os
+from datetime import datetime
+
 from PIL import Image
+
+from utils.image_cleanup import load_image_timestamps, save_image_timestamps
+
+# This is for working with the PIL library older
+if not hasattr(Image, 'Transpose'):
+    Image.Transpose = Image
 
 def basic_operation(image_id: str, operations: dict) -> dict:
     """
@@ -53,9 +61,9 @@ def basic_operation(image_id: str, operations: dict) -> dict:
                 elif operation == 'flip':
                     direction = params.get('direction')
                     if direction == 'horizontal':
-                        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+                        img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
                     elif direction == 'vertical':
-                        img = img.transpose(Image.FLIP_TOP_BOTTOM)
+                        img = img.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
                 elif operation == 'grayscale':
                     img = img.convert('L')
 
@@ -65,6 +73,11 @@ def basic_operation(image_id: str, operations: dict) -> dict:
             modified_filename = f'{image_id}_modified.png'
             modified_path = os.path.join(modified_folder, modified_filename)
             img.save(modified_path)
+
+            # Record operation timestamp
+            timestamps = load_image_timestamps()
+            timestamps[modified_path] = str(datetime.now())
+            save_image_timestamps(timestamps)
 
             return {
                 'success': True,

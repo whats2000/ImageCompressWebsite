@@ -53,11 +53,18 @@ const PreviewImage = styled.img`
 interface ImagePreviewAreaProps {
   images: ProcessedImage[];
   onDeleteImage: (imageId: string) => void;
+  lastOperation:
+    | 'compressWithWebp'
+    | 'compressWithJpeg'
+    | 'watermark'
+    | 'basicOperation'
+    | null;
 }
 
 export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({
   images,
   onDeleteImage,
+  lastOperation,
 }) => {
   const [imageSrcs, setImageSrcs] = useState<Record<string, string>>({});
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -68,8 +75,26 @@ export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({
       const updatedSrcs: Record<string, string> = {};
       for (const image of images) {
         try {
+          let imageType: string;
+          switch (lastOperation) {
+            case 'compressWithWebp':
+              imageType = 'webp';
+              break;
+            case 'compressWithJpeg':
+              imageType = 'jpeg';
+              break;
+            case 'watermark':
+              imageType = 'watermarked';
+              break;
+            case 'basicOperation':
+              imageType = 'basicOperation';
+              break;
+            default:
+              imageType = 'original';
+              break;
+          }
           const response = await axios.get(
-            `${BACKEND_API_URL}/api/image/${image.imageId}`,
+            `${BACKEND_API_URL}/api/image/${image.imageId}?type=${imageType}`,
           );
           if (response.data.success) {
             updatedSrcs[image.imageId] =
@@ -82,8 +107,8 @@ export const ImagePreviewArea: React.FC<ImagePreviewAreaProps> = ({
       setImageSrcs(updatedSrcs);
     };
 
-    fetchImages();
-  }, [images]);
+    void fetchImages();
+  }, [images, lastOperation]);
 
   if (images.length === 0) return null;
 

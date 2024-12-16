@@ -14,7 +14,8 @@ def get_downloadable_image(image_id: str, image_type: str='original') -> dict:
         'original': os.path.join(base_dir, 'uploads'),
         'webp': os.path.join(base_dir, 'compressed'),
         'jpeg': os.path.join(base_dir, 'compressed'),
-        'watermarked': os.path.join(base_dir, 'watermarked')
+        'watermarked': os.path.join(base_dir, 'watermarked'),
+        'basicOperation': os.path.join(base_dir, 'modified')
     }
 
     # Validate image type
@@ -29,15 +30,7 @@ def get_downloadable_image(image_id: str, image_type: str='original') -> dict:
     
     try:
         for filename in os.listdir(directory):
-            if image_type == 'original' or image_type == 'watermarked':
-                if filename.startswith(image_id):
-                    filepath = os.path.join(directory, filename)
-                    return {
-                        'success': True,
-                        'filepath': filepath,
-                        'filename': filename
-                    }
-            else:
+            if image_type == 'webp' or image_type == 'jpeg':
                 if filename.startswith(image_id) and filename.endswith(image_type):
                     filepath = os.path.join(directory, filename)
                     return {
@@ -45,6 +38,14 @@ def get_downloadable_image(image_id: str, image_type: str='original') -> dict:
                         'filepath': filepath,
                         'filename': filename
                     }
+
+            if filename.startswith(image_id):
+                filepath = os.path.join(directory, filename)
+                return {
+                    'success': True,
+                    'filepath': filepath,
+                    'filename': filename
+                }
     except FileNotFoundError:
         return {
             'success': False,

@@ -15,7 +15,12 @@ const DownloadCard = styled(Card)`
 
 interface DownloadControlsProps {
   images: ProcessedImage[];
-  lastOperation: 'compressWithWebp' | 'compressWithJpeg' | 'watermark' | null;
+  lastOperation:
+    | 'compressWithWebp'
+    | 'compressWithJpeg'
+    | 'watermark'
+    | 'basicOperation'
+    | null;
 }
 
 export const DownloadControls: React.FC<DownloadControlsProps> = ({
@@ -23,7 +28,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
   lastOperation,
 }) => {
   const [selectedDownloadType, setSelectedDownloadType] = useState<
-    'compressed' | 'original' | 'watermarked'
+    'compressed' | 'original' | 'watermarked' | 'basicOperation'
   >('original');
   const [compressionFormat, setCompressionFormat] = useState<'webp' | 'jpeg'>(
     'webp',
@@ -38,6 +43,8 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
     } else if (lastOperation === 'compressWithWebp') {
       setSelectedDownloadType('compressed');
       setCompressionFormat('webp');
+    } else if (lastOperation === 'basicOperation') {
+      setSelectedDownloadType('basicOperation');
     } else {
       setSelectedDownloadType('original');
     }
@@ -59,6 +66,9 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
             break;
           case 'watermarked':
             downloadType = 'watermarked';
+            break;
+          case 'basicOperation':
+            downloadType = 'basicOperation';
             break;
           case 'original':
           default:
@@ -85,7 +95,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
             ? image.fileName.split('.').pop()
             : downloadType === 'watermarked'
               ? 'watermarked.png'
-              : `${downloadType}`;
+              : `${downloadType}.png`;
         const filename = `${image.fileName.split('.')[0]}_${downloadType}.${extension}`;
         link.download = filename;
 
@@ -140,6 +150,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
             <Radio.Button value='original'>Original</Radio.Button>
             <Radio.Button value='compressed'>Compressed</Radio.Button>
             <Radio.Button value='watermarked'>Watermarked</Radio.Button>
+            <Radio.Button value='basicOperation'>Basic Operation</Radio.Button>
           </Radio.Group>
         </Flex>
 

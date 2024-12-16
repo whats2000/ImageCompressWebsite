@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from services.download_service import get_image_base64
 
 image_bp = Blueprint('image', __name__)
@@ -10,7 +10,8 @@ def get_base64_image(image_id):
     :param image_id: Unique identifier for the image
     :return: JSON with base64 encoded image or error message
     """
-    result = get_image_base64(image_id)
+    image_type = request.args.get('type', 'original')
+    result = get_image_base64(image_id, image_type)
     
     if not result['success']:
         return jsonify(result), 404

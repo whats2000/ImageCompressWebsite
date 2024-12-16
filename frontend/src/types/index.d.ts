@@ -1,3 +1,11 @@
+export interface ImageOperations {
+  resize?: { width: number; height: number };
+  rotate?: { angle: number };
+  crop?: { left: number; top: number; right: number; bottom: number };
+  flip?: { direction: 'horizontal' | 'vertical' };
+  grayscale?: object;
+}
+
 export interface ProcessedImage {
   imageId: string;
   fileName: string;
@@ -20,11 +28,4 @@ export interface WatermarkResponse {
   success: boolean;
   message: string;
   watermarked_image_url?: string;
-}
-
-export interface UploadState {
-  images: ProcessedImage[];
-  selectedDownloadType: 'compressed' | 'original' | 'watermarked';
-  compressionQuality: number;
-  compressionFormat: 'jpeg' | 'webp';
 }

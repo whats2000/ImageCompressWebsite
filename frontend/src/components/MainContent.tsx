@@ -4,10 +4,11 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
-import { ProcessedImage } from '../types';
+import { ImageOperations, ProcessedImage } from '../types';
 import { BACKEND_API_URL } from '../styles/GlobalStyles';
 import { useNotification } from '../hooks/useNotification';
 import { WatermarkConfig } from './controls/WatermarkEditor';
+import { BasicOperationControls } from './controls/BasicOperationControls';
 
 // Import subcomponents
 import { UploadArea } from './upload/UploadArea';
@@ -34,13 +35,18 @@ export const MainContent: React.FC = () => {
   const [isCompressing, setIsCompressing] = useState(false);
   const [isWatermarking, setIsWatermarking] = useState(false);
   const [lastOperation, setLastOperation] = useState<
-    'compressWithWebp' | 'compressWithJpeg' | 'watermark' | null
+    | 'compressWithWebp'
+    | 'compressWithJpeg'
+    | 'watermark'
+    | 'basicOperation'
+    | null
   >(null);
 
   // Use the custom notification hook
   const notify = useNotification();
 
   const handleUploadComplete = (newImages: ProcessedImage[]) => {
+    setLastOperation(null);
     setImages((prev) => [...prev, ...newImages]);
     notify.success(`${newImages.length} image(s) uploaded successfully`);
   };
@@ -131,7 +137,6 @@ export const MainContent: React.FC = () => {
 
     try {
       const watermarkPromises = images.map(async (image) => {
-        // 构建请求载荷，包含原始图片尺寸信息
         const payload = {
           image_id: image.imageId,
           watermark_text: watermarkText,
@@ -178,6 +183,43 @@ export const MainContent: React.FC = () => {
     }
   };
 
+  const handleBasicOperation = async (operations: ImageOperations) => {
+    if (images.length === 0) {
+      notify.warn('No images uploaded');
+      return;
+    }
+
+    try {
+      const operationPromises = images.map(async (image) => {
+        const response = await axios.post(
+          `${BACKEND_API_URL}/api/basic_operation`,
+          { image_id: image.imageId, operations },
+        );
+
+        const data = response.data;
+
+        if (data.success) {
+          setLastOperation('basicOperation');
+          return {
+            ...image,
+            url: data.modified_image_url,
+          };
+        } else {
+          notify.error(`Error applying basic operation to ${image.fileName}`);
+          return image;
+        }
+      });
+
+      const modifiedImages = await Promise.all(operationPromises);
+
+      setImages(modifiedImages);
+      notify.success('Basic operation applied successfully');
+    } catch (error) {
+      notify.error(`Error applying ${JSON.stringify(operations)}`);
+      console.error(error);
+    }
+  };
+
   return (
     <MainContainer>
       <h1>COMPRESS IMAGE</h1>
@@ -187,7 +229,11 @@ export const MainContent: React.FC = () => {
 
       {images.length > 0 && (
         <>
-          <ImagePreviewArea images={images} onDeleteImage={handleDeleteImage} />
+          <ImagePreviewArea
+            images={images}
+            onDeleteImage={handleDeleteImage}
+            lastOperation={lastOperation}
+          />
           <Space direction='vertical' style={{ width: '100%' }}>
             <WatermarkControls
               images={images}
@@ -202,6 +248,10 @@ export const MainContent: React.FC = () => {
               onFormatChange={setCompressionFormat}
               onCompress={handleCompressImages}
               isCompressing={isCompressing}
+            />
+            <BasicOperationControls
+              images={images}
+              onApplyOperation={handleBasicOperation}
             />
             <DownloadControls images={images} lastOperation={lastOperation} />
           </Space>
