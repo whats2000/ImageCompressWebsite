@@ -106,7 +106,7 @@ export const BasicOperationControls: React.FC<BasicOperationControlsProps> = ({
   };
 
   return (
-    <Card title='Basic Operation Configuration'>
+    <Card title='Basic Operation Configuration' style={{ height: '100%' }}>
       <Flex
         justify='center'
         align='center'

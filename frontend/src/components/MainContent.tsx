@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import { Col, Row, Space } from 'antd';
 
 import { ImageOperations, ProcessedImage } from '../types';
 import { BACKEND_API_URL } from '../styles/GlobalStyles';
@@ -16,7 +17,6 @@ import { ImagePreviewArea } from './upload/ImagePreviewArea';
 import { CompressionControls } from './controls/CompressionControls';
 import WatermarkControls from './controls/WatermarkControls';
 import { DownloadControls } from './controls/DownloadControls';
-import { Space } from 'antd';
 
 const MainContainer = styled.main`
   max-width: 1200px;
@@ -234,26 +234,41 @@ export const MainContent: React.FC = () => {
             onDeleteImage={handleDeleteImage}
             lastOperation={lastOperation}
           />
-          <Space direction='vertical' style={{ width: '100%' }}>
-            <WatermarkControls
-              images={images}
-              onAddWatermark={handleAddWatermark}
-              isWatermarking={isWatermarking}
-            />
-            <CompressionControls
-              images={images}
-              compressionQuality={compressionQuality}
-              compressionFormat={compressionFormat}
-              onQualityChange={setCompressionQuality}
-              onFormatChange={setCompressionFormat}
-              onCompress={handleCompressImages}
-              isCompressing={isCompressing}
-            />
-            <BasicOperationControls
-              images={images}
-              onApplyOperation={handleBasicOperation}
-            />
-            <DownloadControls images={images} lastOperation={lastOperation} />
+          <Space direction='vertical' size='large' style={{ width: '100%' }}>
+            <Row gutter={[16, 16]}>
+              <Col span={24} md={{ span: 12 }}>
+                <WatermarkControls
+                  images={images}
+                  onAddWatermark={handleAddWatermark}
+                  isWatermarking={isWatermarking}
+                />
+              </Col>
+              <Col span={24} md={{ span: 12 }}>
+                <CompressionControls
+                  images={images}
+                  compressionQuality={compressionQuality}
+                  compressionFormat={compressionFormat}
+                  onQualityChange={setCompressionQuality}
+                  onFormatChange={setCompressionFormat}
+                  onCompress={handleCompressImages}
+                  isCompressing={isCompressing}
+                />
+              </Col>
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col span={24} md={{ span: 12 }}>
+                <BasicOperationControls
+                  images={images}
+                  onApplyOperation={handleBasicOperation}
+                />
+              </Col>
+              <Col span={24} md={{ span: 12 }}>
+                <DownloadControls
+                  images={images}
+                  lastOperation={lastOperation}
+                />
+              </Col>
+            </Row>
           </Space>
         </>
       )}

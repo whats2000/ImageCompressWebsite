@@ -125,7 +125,7 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
   };
 
   return (
-    <DownloadCard title='Download Images'>
+    <DownloadCard title='Download Images' style={{ height: '100%' }}>
       <Flex
         justify={'center'}
         align={'center'}

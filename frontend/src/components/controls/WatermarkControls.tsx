@@ -66,10 +66,10 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
       return;
     }
 
-    // 使用預設位置配置
+    // Use the selected position
     const position = positionMap[watermarkPosition as keyof typeof positionMap];
 
-    // 使用上次的配置，但更新文字和位置
+    // Use the last watermark configuration
     const quickConfig = {
       ...lastWatermarkConfig,
       text: watermarkText,
@@ -88,7 +88,7 @@ const WatermarkControls: React.FC<WatermarkControlsProps> = ({
   };
 
   return (
-    <Card title={'Watermark Configuration'}>
+    <Card title={'Watermark Configuration'} style={{ height: '100%' }}>
       <Flex
         wrap={'wrap'}
         align={'center'}

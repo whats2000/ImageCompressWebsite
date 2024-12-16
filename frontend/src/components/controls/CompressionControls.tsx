@@ -23,7 +23,7 @@ export const CompressionControls: React.FC<CompressionControlsProps> = ({
   isCompressing,
 }) => {
   return (
-    <Card title={'Compression Configuration'}>
+    <Card title={'Compression Configuration'} style={{ height: '100%' }}>
       <Flex
         justify={'center'}
         align={'center'}
