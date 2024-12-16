@@ -69,7 +69,7 @@ const DraggableWatermark = styled.div<{ $isDragging: boolean }>`
   white-space: nowrap;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   pointer-events: all;
-  font-size: 36px;
+  font-size: 12px;
 `;
 
 const ControlsPanel = styled.div`
