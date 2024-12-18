@@ -95,7 +95,13 @@ export const DownloadControls: React.FC<DownloadControlsProps> = ({
             ? image.fileName.split('.').pop()
             : downloadType === 'watermarked'
               ? 'watermarked.png'
-              : `${downloadType}.png`;
+              : downloadType.endsWith('jpeg')
+                ? 'jpeg'
+                : downloadType.endsWith('webp')
+                  ? 'webp'
+                  : 'png';
+
+        console.log(extension);
         const filename = `${image.fileName.split('.')[0]}_${downloadType}.${extension}`;
         link.download = filename;
 
