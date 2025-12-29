@@ -8,7 +8,7 @@ import { GlobalStyles } from './styles/GlobalStyles';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router basename="/ImageCompressWebsite">
       <GlobalStyles />
       <Header />
       <Routes>
