@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import logoImg from '../assets/logo.png';
 
@@ -41,7 +42,7 @@ const NavRight = styled.div`
   gap: 2rem;
 `;
 
-const NavLink = styled.a`
+const NavLink = styled(Link)`
   color: white;
   text-decoration: none;
   font-size: 1.2rem;
@@ -68,7 +69,7 @@ const DropdownContent = styled.div<{ $isOpen: boolean }>`
   border-radius: 4px;
 `;
 
-const DropdownItem = styled.a`
+const DropdownItem = styled(Link)`
   color: var(--text-color);
   padding: 12px 16px;
   text-decoration: none;
@@ -91,17 +92,17 @@ export const Header: React.FC = () => {
           <BrandText>IMAGE COMPRESS</BrandText>
         </NavLeft>
         <NavRight>
-          <NavLink href='#'>IMAGE COMPRESS</NavLink>
+          <NavLink to='/'>IMAGE COMPRESS</NavLink>
           <Dropdown
             onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
           >
-            <NavLink href='#'>MORE ▼</NavLink>
+            <NavLink to='#'>MORE ▼</NavLink>
             <DropdownContent $isOpen={isDropdownOpen}>
-              <DropdownItem href='#'>About</DropdownItem>
-              <DropdownItem href='#'>Contact Us</DropdownItem>
-              <DropdownItem href='#'>Privacy</DropdownItem>
-              <DropdownItem href='#'>Terms</DropdownItem>
+              <DropdownItem to='/about'>About</DropdownItem>
+              <DropdownItem to='#'>Contact Us</DropdownItem>
+              <DropdownItem to='#'>Privacy</DropdownItem>
+              <DropdownItem to='#'>Terms</DropdownItem>
             </DropdownContent>
           </Dropdown>
         </NavRight>

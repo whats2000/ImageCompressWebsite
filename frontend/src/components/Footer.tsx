@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 const FooterContainer = styled.footer<{ $isVisible: boolean }>`
@@ -28,6 +29,10 @@ const FooterLinks = styled.div`
     color: white;
     text-decoration: none;
     margin-left: 2rem;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 
   // Hide when window is small
@@ -66,9 +71,9 @@ export const Footer: React.FC = () => {
       <FooterContent>
         <p>&copy; {currentYear} Image Compress. All rights reserved.</p>
         <FooterLinks>
-          <a href='#'>Privacy</a>
-          <a href='#'>Terms</a>
-          <a href='#'>Contact</a>
+          <Link to='#'>Privacy</Link>
+          <Link to='#'>Terms</Link>
+          <Link to='#'>Contact</Link>
         </FooterLinks>
       </FooterContent>
     </FooterContainer>
